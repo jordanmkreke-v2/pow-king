@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pow King</title>
+<style>
+/* Layout: one centered column on a full-page gradient, Hawk Hill PR style. Thin uppercase question,
+   a giant glowing one-word verdict, a stat row, then frosted-glass cards. Single committed look. */
+:root {
+  --g1: #4f8cf7; --g2: #6a5ae0; --g3: #7d3fb3;         /* electric blue -> violet -> grape */
+  --bg: #5f6fe0;                                       /* fallback behind the gradient */
+  --fg: #ffffff; --dim: rgba(255,255,255,.72); --faint: rgba(255,255,255,.5);
+  --glass: rgba(255,255,255,.13); --glass-2: rgba(255,255,255,.2); --edge: rgba(255,255,255,.26);
+  --yes: #4ade80; --maybe: #fbbf24; --no: #f87171; --sky: #7dd3fc;
+  --pow: #7dd3fc; --groom: #fbbf24; --storm: #c4b5fd; --open: #4ade80;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg) linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%) no-repeat; background-size: 100% 100%; min-height: 100%; }
+body {
+  margin: 0; min-height: 100%; color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5;
+  background: transparent;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 56px 48px; text-align: center;
+}
+main { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; justify-items: center; opacity: 0; transition: opacity .45s ease; }
+main.ready { opacity: 1; }
+h1 { font-size: clamp(22px, 4.5vw, 38px); font-weight: 300; letter-spacing: .12em; text-transform: uppercase; margin: 0; opacity: .92; text-wrap: balance; }
+h2 { font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+h2 svg { width: 18px; height: 18px; }
+h3 { font-size: 15px; font-weight: 600; margin: 0; }
+p { margin: 0; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.crown[hidden] { display: none !important; }
+.crown { transform: rotate(-6deg); width: clamp(56px, 9vw, 92px); height: auto; filter: drop-shadow(0 0 18px rgba(255,214,90,.75)); margin-bottom: -6px; }
+.word { font-size: clamp(72px, 20vw, 150px); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 8px 0 0; }
+.word.yes { color: var(--yes); text-shadow: 0 0 30px rgba(74,222,128,.55); }
+.word.maybe { color: var(--maybe); text-shadow: 0 0 30px rgba(251,191,36,.55); }
+.word.no { color: var(--no); text-shadow: 0 0 30px rgba(248,113,113,.55); }
+.word.sky { color: var(--sky); text-shadow: 0 0 30px rgba(125,211,252,.55); }
+.word.storm { color: var(--storm); text-shadow: 0 0 30px rgba(196,181,253,.6); }
+.word.loading { color: var(--faint); }
+.verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; }
+.verdict strong { font-weight: 700; }
+.stats { display: flex; gap: 12px 40px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.stat { display: grid; gap: 2px; min-width: 120px; }
+.stat b { font-size: 30px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat b small { font-size: 15px; font-weight: 500; opacity: .8; margin-left: 2px; }
+.stat span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.stat em { font-style: normal; font-size: 13px; color: var(--dim); }
+.status { font-size: 13px; color: var(--faint); display: inline-flex; gap: 8px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); display: inline-block; }
+.dot.live { background: var(--yes); box-shadow: 0 0 10px var(--yes); }
+
+.glass { width: 100%; background: var(--glass); border: 1px solid var(--edge); border-radius: 24px; padding: 20px 18px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: grid; gap: 12px; text-align: left; }
+.glass > .sec-head { text-align: center; display: grid; gap: 4px; }
+.sec-head p { font-size: 14px; color: var(--dim); }
+.pow h2 { color: var(--pow); } .groom h2 { color: var(--groom); } .storm h2 { color: var(--storm); }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; align-items: start; }
+.list { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; background: var(--glass); border: 1px solid var(--edge); border-radius: 16px; padding: 10px 14px; min-width: 0; }
+.row .name { font-weight: 600; font-size: 15px; }
+.row .name small { font-weight: 400; color: var(--dim); font-size: 12px; margin-left: 5px; }
+.row .why { color: var(--dim); font-size: 13px; grid-column: 1; }
+.row .big { grid-column: 2; grid-row: 1 / span 2; font-weight: 800; font-size: 26px; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
+.row .big small { display: block; white-space: nowrap; font-weight: 600; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-top: 3px; }
+.pow .big { color: var(--pow); } .groom .big { color: var(--groom); } .storm .big { color: var(--storm); }
+.empty { color: var(--dim); font-size: 14px; text-align: center; padding: 6px 0; }
+
+/* everyone else: fits the column, never scrolls sideways */
+table { border-collapse: collapse; width: 100%; font-size: 14px; table-layout: auto; }
+th, td { padding: 9px 8px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid rgba(255,255,255,.14); vertical-align: middle; }
+th { border-top: 0; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 600; padding-top: 2px; }
+th:first-child, td:first-child { text-align: left; padding-left: 4px; }
+td:first-child { font-weight: 600; }
+td:first-child small { color: var(--dim); font-weight: 400; margin-left: 5px; }
+td.stc { text-align: left; white-space: nowrap; }
+.st { font-weight: 500; color: var(--dim); font-size: 13px; }
+.st.open { color: #052e16; background: var(--open); padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; box-shadow: 0 0 12px rgba(74,222,128,.45); }
+td .st + small { display: inline; color: var(--dim); font-weight: 400; font-size: 12px; margin-left: 6px; }
+td.heat { color: var(--fg); } td.h1 { background: rgba(125,211,252,.16); } td.h2 { background: rgba(125,211,252,.34); } td.h3 { background: rgba(125,211,252,.6); color: #082f49; font-weight: 700; }
+th { white-space: nowrap; }
+tr.grp th { border-top: 0; padding: 0 8px 2px; font-size: 10px; letter-spacing: .14em; color: var(--faint); }
+tr.grp th.fell { border-bottom: 1px solid rgba(255,255,255,.35); text-align: center; }
+tr.grp th.fc { border-bottom: 1px solid var(--storm); color: var(--storm); }
+.only-sm { display: none; }
+.chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; color: #0b1322; }
+.chip.pow { background: var(--pow); } .chip.groom { background: var(--groom); } .chip.storm { background: var(--storm); }
+.legend { font-size: 12px; color: var(--dim); text-align: center; }
+
+details { width: 100%; max-width: 560px; }
+summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px); transition: background .2s; }
+summary::-webkit-details-marker { display: none; }
+summary:hover, summary:focus-visible { background: var(--glass-2); outline: none; }
+summary::after { content: "+"; font-weight: 400; opacity: .7; }
+details[open] summary::after { content: "–"; }
+.faq { margin-top: 14px; display: grid; gap: 14px; text-align: left; background: var(--glass); border: 1px solid var(--edge); border-radius: 20px; padding: 18px; }
+.faq div { display: grid; gap: 3px; }
+.faq p { color: var(--dim); font-size: 14px; }
+footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
+:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+@media (max-width: 760px) { .three { grid-template-columns: 1fr; } .hide-md { display: none; } }
+@media (max-width: 560px) {
+  body { padding-block: 36px 40px; }
+  .glass { padding: 16px 12px; border-radius: 20px; }
+  table { font-size: 13px; } th, td { padding: 8px 5px; }
+  .hide-sm, .chip { display: none; } .only-sm { display: inline; }
+  th { letter-spacing: .04em; font-size: 10px; } th, td { padding: 8px 4px; } td:first-child { padding-left: 2px; }
+  .legend { font-size: 11px; }
+  td .st + small { display: none; }
+  .stat b { font-size: 24px; } .stats { gap: 10px 22px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .word.yes, .word.maybe, .word.no, .word.sky, .word.storm { animation: pulse 2.4s ease-in-out infinite; }
+  .crown { animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-6px) rotate(-6deg); } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+}
+</style>
+</head>
+<body style="margin:0">
+
+
+<main>
+  <header style="display:grid;gap:10px;justify-items:center">
+    <p class="eyebrow">Ikon Pass · Western US · <span id="today-label">today</span></p>
+    <h1>Who is today's pow king?</h1>
+    <svg class="crown" id="crown" hidden viewBox="0 0 120 84" aria-hidden="true">
+      <defs><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".55" stop-color="#f5c542"/><stop offset="1" stop-color="#d9960f"/></linearGradient></defs>
+      <path fill="url(#gold)" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/>
+      <rect fill="url(#gold)" x="10" y="70" width="100" height="10" rx="3"/>
+      <circle fill="#fff7d6" cx="4" cy="22" r="5"/><circle fill="#fff7d6" cx="60" cy="8" r="6"/><circle fill="#fff7d6" cx="116" cy="22" r="5"/>
+      <circle fill="#7dd3fc" cx="36" cy="60" r="4.5"/><circle fill="#f87171" cx="60" cy="58" r="5.5"/><circle fill="#7dd3fc" cx="84" cy="60" r="4.5"/>
+    </svg>
+    <p class="word loading" id="word"></p>
+    <p class="verdict" id="verdict">Checking the mountains…</p>
+    <div class="stats">
+      <div class="stat"><b id="s-open">–</b><span>Resorts open</span><em id="s-open-note">&nbsp;</em></div>
+      <div class="stat"><b id="s-pow">–</b><span>Deepest 24h</span><em id="s-pow-note">&nbsp;</em></div>
+      <div class="stat"><b id="s-storm">–</b><span>Biggest 5-day</span><em id="s-storm-note">&nbsp;</em></div>
+    </div>
+    <p class="status"><span class="dot" id="dot"></span><span id="status">Loading snow data</span></p>
+  </header>
+
+  <div class="three">
+    <section class="glass pow">
+      <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></svg> Fresh tracks</h2><p>New snow, last 24h. Six inches and you call in sick.</p></div>
+      <div class="list" id="list-pow"></div>
+    </section>
+    <section class="glass groom">
+      <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg> Groomer day</h2><p>No new snow, light wind, sun out. Lap the corduroy.</p></div>
+      <div class="list" id="list-groom"></div>
+    </section>
+    <section class="glass storm">
+      <div class="sec-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 8a3.5 3.5 0 0 1 .5 7"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg> Storm's coming</h2><p>Most snow in the next five days. Watch the window.</p></div>
+      <div class="list" id="list-storm"></div>
+    </section>
+  </div>
+
+  <section class="glass">
+    <div class="sec-head"><h2>Everyone else</h2><p>Every Western US Ikon mountain. Open ones first, then by what's coming.</p></div>
+    <table>
+      <thead>
+        <tr class="grp"><th></th><th></th><th colspan="2" class="fell">Fell</th><th class="fc">Forecast</th><th class="hide-md"></th></tr>
+        <tr><th>Resort</th><th style="text-align:left">Status</th><th>24h</th><th>72h</th><th>5&nbsp;day</th><th class="hide-md">Right now</th></tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <p class="legend">Inches of snow. "Fell" is what the weather model says came down; "Forecast" is what it expects over the next five days.</p>
+  </section>
+
+  <details>
+    <summary>FAQ</summary>
+    <div class="faq">
+      <div><h3>Where does the snow number come from?</h3><p>A weather model (Open-Meteo), sampled near each resort's upper mountain and refreshed daily. It's a forecast of snowfall, not the resort's official morning report, so treat it as "worth checking" rather than gospel. Resort reports usually read a bit higher.</p></div>
+      <div><h3>How do you know what's open?</h3><p>Each morning we check SkiCentral's list of open ski areas. If a mountain isn't on it, we show its projected opening date from Ikon's own calendar. Closed mountains never make the Fresh tracks or Groomer lists, but they do show up in the storm forecast so you can plan.</p></div>
+      <div><h3>How do you decide it's a groomer day?</h3><p>Under an inch of new snow in the last 24 hours, wind under about 20 mph, sunny or partly sunny, and a high above the low teens. Basically: sunglasses weather.</p></div>
+      <div><h3>What's next?</h3><p>Blackout dates by pass tier, lift status, drive times from the Bay, and a "text the group chat" button. Keep checking.</p></div>
+    </div>
+  </details>
+
+  <footer>Not affiliated with Ikon Pass or Alterra Mountain Company. Weather data © Open-Meteo. Check the resort's own snow report and road conditions before you go.</footer>
+</main>
+
+<script>
+const SNAPSHOT = {"updated":"2026-11-06T16:30+00:00","past_days":3,"resorts":[{"name":"Palisades Tahoe","state":"CA","lat":39.197,"lon":-120.235,"elev_m":2500,"slug":"squawvalley","opens":"2026-11-25","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.717,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[39.0,44.6,46.6,50.0,57.1,53.3,54.1,52.5,55.2,54.6],"tmin":[26.7,25.0,25.0,25.1,36.3,33.4,32.2,29.9,29.0,30.1],"wind":[26.4,10.3,10.0,7.6,13.1,12.0,9.1,5.8,5.4,8.8],"wcode":[75,45,45,3,3,3,3,3,3,3],"pop":[80,0,0,0,0,0,0,0,1,12]},{"name":"Mammoth Mountain","state":"CA","lat":37.631,"lon":-119.033,"elev_m":2900,"slug":"mammoth","opens":"2026-11-13","status":"open","detail":"OPEN - 3 trails, 2 lifts","days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.193,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[35.7,42.3,42.6,46.2,52.7,55.7,55.6,51.5,53.8,51.1],"tmin":[23.8,22.8,23.1,23.1,32.3,34.1,32.7,30.6,27.5,28.5],"wind":[23.9,16.8,15.0,15.8,12.5,14.9,6.1,7.6,5.9,5.9],"wcode":[73,3,0,3,3,3,3,3,0,2],"pop":[13,4,0,0,0,0,0,0,1,6]},{"name":"June Mountain","state":"CA","lat":37.767,"lon":-119.09,"elev_m":2800,"slug":"junemountain","opens":"2026-12-19","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[43.3,45.0,43.4,46.0,55.2,58.9,58.9,49.9,52.8,53.4],"tmin":[25.8,22.5,23.9,25.8,34.4,37.2,36.8,32.0,30.0,31.3],"wind":[32.6,14.0,14.1,11.1,12.0,13.1,6.4,7.1,6.4,6.2],"wcode":[3,1,0,3,3,3,3,3,0,2],"pop":[14,0,0,0,0,0,0,0,1,6]},{"name":"Big Bear Mountain","state":"CA","lat":34.228,"lon":-116.889,"elev_m":2400,"slug":"bigbearmountain","opens":"2026-12-04","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[56.2,50.6,52.5,47.8,51.7,56.9,55.9,54.7,55.0,54.6],"tmin":[38.7,33.1,29.5,32.5,34.2,38.1,40.5,40.2,38.0,39.1],"wind":[18.2,11.2,10.1,19.3,20.8,8.1,5.5,5.6,6.2,7.0],"wcode":[3,0,0,0,0,2,3,3,0,0],"pop":[0,0,0,0,0,0,0,0,0,6]},{"name":"Jackson Hole","state":"WY","lat":43.588,"lon":-110.828,"elev_m":2700,"slug":"jacksonhole","opens":"2026-11-27","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[35.3,34.4,32.6,32.5,41.5,46.3,42.4,40.2,43.4,47.4],"tmin":[19.1,25.0,23.8,21.8,29.3,28.0,30.6,27.8,27.9,29.5],"wind":[6.9,5.4,13.7,15.0,12.5,14.2,6.3,7.2,4.5,4.6],"wcode":[3,3,45,3,3,3,3,3,3,0],"pop":[2,0,3,1,2,0,1,1,1,3]},{"name":"Alta","state":"UT","lat":40.588,"lon":-111.638,"elev_m":2900,"slug":"alta","opens":"2026-11-20","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[36.2,30.3,32.6,33.7,38.3,46.1,46.5,42.2,43.0,45.6],"tmin":[18.7,22.5,20.6,17.3,28.2,33.1,34.3,30.7,29.4,30.2],"wind":[23.7,21.7,16.8,8.8,14.6,15.5,6.5,6.5,4.5,4.5],"wcode":[3,73,45,3,3,3,3,3,3,3],"pop":[1,43,1,1,1,0,0,0,0,4]},{"name":"Snowbird","state":"UT","lat":40.581,"lon":-111.656,"elev_m":3000,"slug":"snowbird","opens":"2026-11-27","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[34.1,28.3,30.4,32.5,38.6,45.0,45.3,41.0,41.8,44.4],"tmin":[18.3,22.9,20.0,17.0,23.0,31.9,33.2,29.6,28.2,29.0],"wind":[19.4,16.9,15.8,8.4,12.2,12.7,6.5,6.5,4.5,4.5],"wcode":[3,45,45,45,3,3,3,3,3,3],"pop":[1,44,1,1,1,0,0,0,0,4]},{"name":"Solitude","state":"UT","lat":40.62,"lon":-111.592,"elev_m":2800,"slug":"solitude","opens":"2026-11-20","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[37.8,31.3,34.9,34.2,38.9,49.1,50.2,46.2,46.5,47.5],"tmin":[21.1,26.1,24.2,22.1,28.2,34.5,34.7,31.4,30.9,32.8],"wind":[13.0,11.6,10.4,8.5,7.3,9.1,4.6,6.2,5.6,4.1],"wcode":[3,73,45,2,3,3,3,3,3,3],"pop":[1,42,2,1,1,0,0,0,0,4]},{"name":"Brighton","state":"UT","lat":40.598,"lon":-111.583,"elev_m":2800,"slug":"brighton","opens":"2026-12-04","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,1.102,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[35.9,31.1,34.0,34.7,39.4,49.1,50.2,46.2,46.5,47.5],"tmin":[18.4,23.6,20.6,21.5,29.4,34.5,34.7,31.4,30.9,32.8],"wind":[17.2,15.7,13.5,7.6,11.2,11.4,4.6,6.2,5.6,4.1],"wcode":[3,75,45,3,3,3,3,3,3,3],"pop":[1,42,2,1,1,0,0,0,0,4]},{"name":"Deer Valley","state":"UT","lat":40.637,"lon":-111.478,"elev_m":2600,"slug":"deervalley","opens":"2026-12-05","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.303,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[39.3,34.5,37.9,39.0,44.2,51.5,52.5,48.6,48.8,49.8],"tmin":[25.8,31.4,30.0,29.6,32.5,36.8,37.0,33.8,33.2,35.1],"wind":[17.9,16.5,12.4,10.3,11.1,12.4,4.6,6.2,5.6,4.1],"wcode":[3,73,45,3,3,3,3,3,3,3],"pop":[1,39,2,1,1,0,0,0,0,4]},{"name":"Snowbasin","state":"UT","lat":41.216,"lon":-111.857,"elev_m":2300,"slug":"snowbasin","opens":"2026-11-27","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[42.5,39.3,40.1,41.3,44.9,48.7,51.5,48.9,47.8,47.6],"tmin":[30.5,32.8,32.1,29.5,33.3,32.7,34.5,34.8,32.4,31.7],"wind":[12.3,10.4,10.4,10.7,10.4,11.8,7.2,5.8,6.4,6.0],"wcode":[3,3,3,3,3,3,3,3,3,3],"pop":[1,18,4,1,1,0,0,0,0,3]},{"name":"Aspen Snowmass","state":"CO","lat":39.209,"lon":-106.949,"elev_m":3000,"slug":"aspen|snowmass","opens":"2026-11-26","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,5.071,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[38.0,41.1,36.1,34.0,36.5,47.0,48.8,47.0,46.3,43.2],"tmin":[25.9,24.9,24.7,26.7,25.2,26.6,28.9,30.0,28.1,28.7],"wind":[6.8,9.8,8.5,6.2,7.2,7.4,6.5,6.8,5.2,6.6],"wcode":[3,75,45,3,3,3,3,3,3,1],"pop":[3,93,11,1,0,0,0,0,1,0]},{"name":"Steamboat","state":"CO","lat":40.457,"lon":-106.805,"elev_m":2800,"slug":"steamboat","opens":"2026-11-21","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[36.3,39.4,42.0,39.5,42.2,47.9,48.5,45.7,44.4,43.9],"tmin":[26.9,26.1,26.4,26.5,27.0,26.3,29.3,29.1,28.0,27.0],"wind":[5.3,20.5,5.8,7.1,6.0,6.4,6.2,8.3,6.7,5.4],"wcode":[45,3,45,3,3,3,3,3,3,1],"pop":[3,5,0,1,0,0,0,0,1,0]},{"name":"Winter Park","state":"CO","lat":39.887,"lon":-105.763,"elev_m":3000,"slug":"winterpark","opens":null,"status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.193,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[34.8,45.1,45.5,41.7,44.4,51.0,50.7,47.9,45.3,41.9],"tmin":[23.8,20.6,22.8,25.4,23.9,30.0,31.0,29.0,27.0,26.5],"wind":[10.5,13.5,11.1,8.1,7.5,6.3,6.2,7.3,7.1,8.5],"wcode":[73,45,45,3,3,3,3,3,3,0],"pop":[16,7,0,1,0,0,0,2,1,1]},{"name":"Copper Mountain","state":"CO","lat":39.501,"lon":-106.151,"elev_m":3300,"slug":"copper","opens":"2026-11-06","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,1.984,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[36.3,41.3,38.0,37.7,42.5,47.3,48.1,45.2,44.0,39.5],"tmin":[20.4,20.4,22.1,21.3,20.8,23.6,26.4,25.2,22.9,23.3],"wind":[9.3,8.9,9.4,9.0,7.0,7.6,4.4,8.4,6.3,7.9],"wcode":[3,75,2,3,3,3,3,3,3,0],"pop":[2,69,2,1,0,0,0,1,1,1]},{"name":"Arapahoe Basin","state":"CO","lat":39.642,"lon":-105.872,"elev_m":3500,"slug":"arapahoe","opens":"2026-10-30","status":"open","detail":"OPEN - 1 trails, 1 lifts, 1\" past 72 hours","days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[32.7,37.9,37.7,36.8,39.5,45.9,45.8,42.5,41.5,35.9],"tmin":[16.9,16.8,19.7,20.1,19.0,25.2,26.6,24.2,21.9,21.8],"wind":[18.5,18.4,15.9,8.2,8.4,5.4,5.4,8.4,8.3,9.4],"wcode":[45,45,45,3,3,3,3,3,3,1],"pop":[4,22,1,2,0,0,0,1,1,1]},{"name":"Eldora","state":"CO","lat":39.937,"lon":-105.583,"elev_m":3000,"slug":"eldora","opens":"2026-11-13","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[39.3,40.2,43.7,43.4,45.5,53.1,52.4,49.4,47.6,43.5],"tmin":[23.8,22.6,23.6,26.6,25.2,29.2,30.7,28.6,26.5,24.8],"wind":[16.5,8.7,7.4,10.4,8.1,9.9,10.1,11.4,7.8,8.7],"wcode":[45,45,45,3,3,3,3,3,3,1],"pop":[9,5,0,1,0,0,0,2,1,1]},{"name":"Big Sky","state":"MT","lat":45.284,"lon":-111.401,"elev_m":2800,"slug":"bigsky","opens":"2026-11-25","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[31.1,39.8,33.5,34.3,43.5,40.4,38.2,39.0,42.7,48.1],"tmin":[16.1,20.2,20.9,19.7,28.3,25.2,25.0,25.9,26.6,29.1],"wind":[17.0,14.8,13.0,14.8,11.4,10.4,5.2,6.5,5.1,5.2],"wcode":[1,2,3,3,3,3,3,3,3,0],"pop":[0,0,1,1,1,0,1,2,1,3]},{"name":"Sun Valley","state":"ID","lat":43.676,"lon":-114.371,"elev_m":2500,"slug":"sunvalley","opens":"2026-11-26","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[35.1,39.7,35.1,37.4,41.9,46.6,44.6,49.3,48.0,50.2],"tmin":[23.0,26.2,24.6,23.1,28.9,29.5,29.9,29.3,29.2,31.2],"wind":[6.0,7.9,7.1,7.7,7.9,7.0,5.1,5.6,5.4,5.6],"wcode":[3,3,3,3,3,3,3,3,3,0],"pop":[1,1,1,1,1,0,1,1,1,6]},{"name":"Schweitzer","state":"ID","lat":48.368,"lon":-116.623,"elev_m":1700,"slug":"schweitzer","opens":"2026-11-27","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.11,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[33.9,36.1,31.5,36.9,44.0,40.4,36.4,38.4,42.3,46.5],"tmin":[29.3,30.0,28.4,29.4,36.9,25.6,22.8,21.4,23.5,24.7],"wind":[5.6,8.0,13.3,18.2,19.1,16.5,3.2,4.4,5.0,5.0],"wcode":[3,1,73,63,63,53,3,3,3,3],"pop":[2,1,37,52,29,57,23,37,18,12]},{"name":"Crystal Mountain","state":"WA","lat":46.935,"lon":-121.474,"elev_m":1900,"slug":"crystalmountain","opens":"2026-11-27","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.083,0.11,0.0,0.0,2.411,0.028,0.0,0.0,0.0],"tmax":[40.8,39.6,35.0,40.9,45.3,31.9,36.2,36.1,44.2,46.5],"tmin":[29.1,28.1,29.1,30.2,31.9,21.5,21.5,27.3,32.3,31.7],"wind":[12.8,8.1,6.3,24.6,23.7,17.8,4.8,6.0,5.0,4.5],"wcode":[3,71,73,53,65,85,71,51,3,3],"pop":[19,65,20,84,99,99,68,64,17,26]},{"name":"Mt. Bachelor","state":"OR","lat":43.979,"lon":-121.688,"elev_m":2200,"slug":"mt.bachelor","opens":"2026-12-04","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.0,0.0,0.0,0.0,0.158,0.0,0.0,0.0,0.0],"tmax":[39.9,38.3,40.6,43.5,50.8,35.5,41.5,48.7,51.5,48.2],"tmin":[29.2,26.5,27.2,32.8,34.8,24.8,25.3,29.6,33.8,33.5],"wind":[13.3,14.1,14.5,12.6,17.5,22.1,6.8,6.5,5.2,6.9],"wcode":[3,3,3,3,3,73,3,3,3,3],"pop":[9,16,6,3,93,93,31,18,7,16]},{"name":"Taos Ski Valley","state":"NM","lat":36.596,"lon":-105.454,"elev_m":3000,"slug":"taos","opens":"2026-11-26","status":"closed","detail":null,"days":["2026-11-03","2026-11-04","2026-11-05","2026-11-06","2026-11-07","2026-11-08","2026-11-09","2026-11-10","2026-11-11","2026-11-12"],"snow":[0.0,0.882,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"tmax":[40.4,39.1,40.8,39.8,43.5,49.0,55.0,49.5,47.6,47.0],"tmin":[26.1,24.7,23.4,32.2,32.2,30.0,31.3,32.8,28.8,26.6],"wind":[13.3,9.5,10.1,6.9,10.1,9.6,5.8,7.3,8.1,7.4],"wcode":[1,75,3,3,3,0,0,2,2,2],"pop":[2,19,4,1,1,0,0,0,1,1]}]};
+
+const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
+const PAST = 3; // days of history in the data; index PAST is today
+
+const $ = id => document.getElementById(id);
+const r1 = n => Math.round(n * 10) / 10;
+const fmtIn = n => (n < 0.05 ? "0" : n < 10 ? r1(n).toString().replace(/\.0$/, "") : Math.round(n).toString());
+const sum = a => a.reduce((s, x) => s + (x || 0), 0);
+const sky = c => c <= 1 ? "Sunny" : c <= 2 ? "Partly sunny" : c === 3 ? "Overcast" : c < 50 ? "Foggy" : c < 70 ? "Rain" : c < 80 ? "Snowing" : c < 90 ? "Showers" : "Snow showers";
+
+function analyze(r) {
+  const t = PAST;
+  const last24 = sum(r.snow.slice(t - 1, t + 1));      // yesterday + today
+  const last72 = sum(r.snow.slice(t - 2, t + 1));      // last 3 days incl. today
+  const next5 = sum(r.snow.slice(t + 1, t + 6));
+  const next5Peak = Math.max(...r.snow.slice(t + 1, t + 6));
+  const peakIdx = r.snow.slice(t + 1, t + 6).indexOf(next5Peak);
+  const wind = r.wind[t], tmax = r.tmax[t], tmin = r.tmin[t], code = r.wcode[t];
+  const today = r.days[t];
+  const isOpen = r.status === "open" || (r.status !== "closed" && !!r.opens && today >= r.opens);
+  const groomerOk = isOpen && last24 < 1 && wind <= 20 && code <= 2 && tmax >= 15;
+  // groomer score: calmer, sunnier, warmer (but not slushy) = better
+  const groomScore = groomerOk ? (20 - wind) + (code === 0 ? 12 : code === 1 ? 10 : code === 2 ? 6 : 0) + Math.max(0, 10 - Math.abs(tmax - 30) / 2) : -1;
+  return { ...r, last24, last72, next5, next5Peak, peakDay: r.days[t + 1 + Math.max(0, peakIdx)], wind, tmax, tmin, code, groomerOk, groomScore, isOpen };
+}
+
+function shortName(a) { return a.name.replace(/ (Mountain|Ski Valley)$/, "").replace("Aspen Snowmass", "Aspen").replace("Palisades Tahoe", "Palisades").replace("Arapahoe Basin", "A-Basin").toUpperCase(); }
+function heat(n) { return n >= 8 ? "heat h3" : n >= 3 ? "heat h2" : n >= 1 ? "heat h1" : ""; }
+function opensText(a) { return a.isOpen ? "Open" : a.opens ? "Opens " + new Date(a.opens + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Opening TBA"; }
+function dayName(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "short" }); }
+function longDay(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "long" }); }
+
+function rowHtml(kind, a, big, unit, why) {
+  return `<div class="row"><div class="name">${a.name}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
+}
+
+function render(data, live) {
+  const all = data.resorts.map(analyze);
+  const today = all[0].days[PAST];
+  $("today-label").textContent = new Date(today + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+
+  // Fresh tracks
+  const open = all.filter(a => a.isOpen);
+  const pow = open.filter(a => a.last24 >= 3).sort((a, b) => b.last24 - a.last24).slice(0, 5);
+  const closedPow = all.filter(a => !a.isOpen && a.last24 >= 3).sort((a, b) => b.last24 - a.last24);
+  const dusting = open.filter(a => a.last24 >= 1 && a.last24 < 3);
+  $("list-pow").innerHTML = (pow.length
+    ? pow.map(a => rowHtml("pow", a, fmtIn(a.last24), "in / 24h", `${fmtIn(a.last72)}" over 3 days · ${sky(a.code)}, ${Math.round(a.tmax)}°, wind ${Math.round(a.wind)} mph`)).join("")
+    : `<p class="empty">No open resort got 3"+ in the last 24 hours. ${dusting.length ? "A dusting at " + dusting.map(a => a.name).join(", ") + "." : "Dry at the open hills."}</p>`)
+    + (closedPow.length ? `<p class="empty">Snowing on closed lifts: ${closedPow.map(a => `${a.name} ${fmtIn(a.last24)}" (${opensText(a)})`).join(", ")}.</p>` : "");
+
+  // Groomer day
+  const groom = all.filter(a => a.groomerOk).sort((a, b) => b.groomScore - a.groomScore).slice(0, 5);
+  $("list-groom").innerHTML = groom.length
+    ? groom.map(a => rowHtml("groom", a, Math.round(a.tmax) + "°", sky(a.code), `Wind ${Math.round(a.wind)} mph · low ${Math.round(a.tmin)}° · last snow ${lastSnowText(a)}`)).join("")
+    : `<p class="empty">${open.length ? "No clean bluebird days at the open resorts. Wind or clouds." : "Nothing is open yet."}</p>`;
+
+  // Storm's coming
+  const storm = all.filter(a => a.next5 >= 2).sort((a, b) => b.next5 - a.next5).slice(0, 5);
+  $("list-storm").innerHTML = storm.length
+    ? storm.map(a => rowHtml("storm", a, fmtIn(a.next5), "in / 5 days", `Biggest day ${longDay(a.peakDay)} (${fmtIn(a.next5Peak)}") · ${a.isOpen ? fmtIn(a.last72) + '" already down' : opensText(a)}`)).join("")
+    : `<p class="empty">Nothing meaningful in the five-day forecast. High pressure, sorry.</p>`;
+
+  // Everyone else
+  const tb = all.slice().sort((a, b) => (b.isOpen - a.isOpen) || ((b.next5 + b.last24) - (a.next5 + a.last24)));
+  $("table-body").innerHTML = tb.map(a => {
+    const chip = a.last24 >= 3 ? `<span class="chip pow">POW</span>` : a.groomerOk ? `<span class="chip groom">GROOM</span>` : a.next5 >= 6 ? `<span class="chip storm">STORM</span>` : "";
+    const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/,.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
+    return `<tr><td>${a.name}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="${heat(a.last24)}">${fmtIn(a.last24)}</td><td class="${heat(a.last72)}">${fmtIn(a.last72)}</td><td class="${heat(a.next5)}">${fmtIn(a.next5)}</td><td class="hide-md">${sky(a.code)} ${Math.round(a.tmax)}°</td></tr>`;
+  }).join("");
+
+  // Verdict
+  const best = pow[0], bigStorm = storm[0];
+  let v, word, cls;
+  const rivals = best ? pow.slice(1).filter(a => a.last24 >= best.last24 - 2 && a.last24 >= 6) : [];
+  const rivalText = rivals.length ? ` ${rivals.map(a => a.name + " (" + fmtIn(a.last24) + '")').join(" and ")} ${rivals.length > 1 ? "are" : "is"} right there with it.` : "";
+  if (best && best.last24 >= 6) { word = shortName(best); cls = "yes"; v = `<strong>${fmtIn(best.last24)}" in the last 24 hours</strong> and it's ${sky(best.code).toLowerCase()} up there.${rivalText || " Go."}`; }
+  else if (best) { word = shortName(best); cls = "maybe"; v = `<strong>${fmtIn(best.last24)}" of new snow.</strong> Soft, not deep. Fun, not fall-line-face-shots fun.`; }
+  else if (bigStorm && bigStorm.next5 >= 6) { word = shortName(bigStorm); cls = "storm"; v = `<strong>Not yet, but soon.</strong> ${fmtIn(bigStorm.next5)}" on the way by ${longDay(bigStorm.peakDay)}. ${groom[0] ? "Meanwhile it's a groomer day at " + groom[0].name + "." : ""}`; }
+  else if (groom[0]) { word = "NOBODY"; cls = "sky"; v = `<strong>No fresh snow, but it's bluebird at ${groom[0].name}:</strong> ${sky(groom[0].code).toLowerCase()}, ${Math.round(groom[0].tmax)}°, ${Math.round(groom[0].wind)} mph wind. Groomer day.`; }
+  else if (!open.length) { word = "NOBODY"; cls = "no"; v = `<strong>Nothing's open yet.</strong> First lifts spin ${(() => { const n = all.filter(a => a.opens).sort((a, b) => a.opens < b.opens ? -1 : 1)[0]; return n ? "at " + n.name + " on " + new Date(n.opens + "T12:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "soon"; })()}.`; }
+  else { word = "NOBODY"; cls = "no"; v = `<strong>No fresh snow, nothing big in the forecast.</strong> ${open.length <= 3 ? "Only " + open.map(a => a.name).join(" and ") + (open.length === 1 ? " is" : " are") + " spinning lifts anyway." : "Go for a bike ride and check back in a few days."}`; }
+  $("crown").hidden = !(cls === "yes" || cls === "maybe");
+  $("word").textContent = word; $("word").className = "word " + cls; $("word").style.fontSize = `min(140px, ${(118 / word.length).toFixed(1)}vw)`;
+  $("verdict").innerHTML = v;
+  // stat row
+  const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
+  const biggest = all.slice().sort((a, b) => b.next5 - a.next5)[0];
+  $("s-open").innerHTML = `${open.length}<small>/ ${all.length}</small>`;
+  $("s-open-note").textContent = open.length ? open.slice(0, 2).map(a => a.name.replace(" Mountain", "")).join(", ") + (open.length > 2 ? " +" + (open.length - 2) : "") : "Lifts closed";
+  $("s-pow").innerHTML = deepest && deepest.last24 >= 0.05 ? `${fmtIn(deepest.last24)}<small>in</small>` : `0<small>in</small>`;
+  $("s-pow-note").textContent = deepest && deepest.last24 >= 0.05 ? deepest.name : "Dry at open resorts";
+  $("s-storm").innerHTML = biggest && biggest.next5 >= 0.05 ? `${fmtIn(biggest.next5)}<small>in</small>` : `0<small>in</small>`;
+  $("s-storm-note").textContent = biggest && biggest.next5 >= 0.05 ? biggest.name : "Nothing coming";
+
+  const stamp = new Date(data.updated).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" });
+  $("dot").className = "dot" + (live ? " live" : "");
+  $("status").textContent = (live ? "Live from Open-Meteo · " : "Snapshot · ") + "updated " + stamp;
+  reveal();
+}
+
+function lastSnowText(a) {
+  for (let i = PAST; i >= 0; i--) if (a.snow[i] >= 1) return i === PAST ? "today" : `${PAST - i}d ago (${fmtIn(a.snow[i])}")`;
+  return "3+ days ago";
+}
+
+async function fetchLive(resorts) {
+  const q = new URLSearchParams({
+    latitude: resorts.map(r => r.lat).join(","), longitude: resorts.map(r => r.lon).join(","), elevation: resorts.map(r => r.elev_m).join(","),
+    daily: DAILY, past_days: PAST, forecast_days: 7, timezone: "America/Los_Angeles",
+    temperature_unit: "fahrenheit", wind_speed_unit: "mph", precipitation_unit: "inch"
+  });
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2800);
+  const res = await fetch("https://api.open-meteo.com/v1/forecast?" + q, { signal: ctl.signal });
+  clearTimeout(t);
+  let d = await res.json();
+  if (!Array.isArray(d)) { if (d.error) throw new Error(d.reason); d = [d]; }
+  return {
+    updated: new Date().toISOString(),
+    resorts: resorts.map((r, i) => ({ ...r, days: d[i].daily.time, snow: d[i].daily.snowfall_sum, tmax: d[i].daily.temperature_2m_max, tmin: d[i].daily.temperature_2m_min, wind: d[i].daily.wind_speed_10m_max, wcode: d[i].daily.weather_code, pop: d[i].daily.precipitation_probability_max }))
+  };
+}
+
+const reveal = () => document.querySelector("main").classList.add("ready");
+
+(async () => {
+  // Render once: wait briefly for live weather, otherwise fall back to the baked-in snapshot.
+  let done = false;
+  const fallback = setTimeout(() => { if (!done) { done = true; render(SNAPSHOT, false); } }, 3000);
+  try {
+    const live = await fetchLive(SNAPSHOT.resorts);
+    clearTimeout(fallback);
+    render(live, true); done = true;
+  } catch (e) {
+    clearTimeout(fallback);
+    if (!done) { done = true; render(SNAPSHOT, false); }
+  }
+})();
+</script>
+
+</body>
+</html>
