@@ -262,8 +262,10 @@ function render(data, live) {
   else if (groom[0]) { word = "NOBODY"; cls = "sky"; v = `<strong>No fresh snow, but it's bluebird at ${groom[0].name}:</strong> ${sky(groom[0].code).toLowerCase()}, ${Math.round(groom[0].tmax)}°, ${Math.round(groom[0].wind)} mph wind. Groomer day.`; }
   else if (!open.length) { word = "NOBODY"; cls = "no"; v = `<strong>Nothing's open yet.</strong> First lifts spin ${(() => { const n = all.filter(a => a.opens).sort((a, b) => a.opens < b.opens ? -1 : 1)[0]; return n ? "at " + n.name + " on " + new Date(n.opens + "T12:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "soon"; })()}.`; }
   else { word = "NOBODY"; cls = "no"; v = `<strong>No fresh snow, nothing big in the forecast.</strong> ${open.length <= 3 ? "Only " + open.map(a => a.name).join(" and ") + (open.length === 1 ? " is" : " are") + " spinning lifts anyway." : "Go for a bike ride and check back in a few days."}`; }
-  $("crown").hidden = !(cls === "yes" || cls === "maybe");
-  $("word").textContent = word; $("word").className = "word " + cls; $("word").style.fontSize = `min(140px, ${(118 / word.length).toFixed(1)}vw)`;
+  // Colour rule: a resort name is blue (and wears the crown); NOBODY is red.
+  const named = word !== "NOBODY";
+  if (named) $("crown").removeAttribute("hidden"); else $("crown").setAttribute("hidden", "");
+  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); $("word").style.fontSize = `min(140px, ${(118 / word.length).toFixed(1)}vw)`;
   $("verdict").innerHTML = v;
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
