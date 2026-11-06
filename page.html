@@ -292,7 +292,7 @@ async function fetchLive(resorts) {
     daily: DAILY, past_days: PAST, forecast_days: 7, timezone: "America/Los_Angeles",
     temperature_unit: "fahrenheit", wind_speed_unit: "mph", precipitation_unit: "inch"
   });
-  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2800);
   const res = await fetch("https://api.open-meteo.com/v1/forecast?" + q, { signal: ctl.signal });
   clearTimeout(t);
   let d = await res.json();
@@ -304,12 +304,16 @@ async function fetchLive(resorts) {
 }
 
 (async () => {
-  if (SNAPSHOT) render(SNAPSHOT, false);
+  // Render once: wait briefly for live weather, otherwise fall back to the baked-in snapshot.
+  let done = false;
+  const fallback = setTimeout(() => { if (!done) { done = true; render(SNAPSHOT, false); } }, 3000);
   try {
     const live = await fetchLive(SNAPSHOT.resorts);
-    render(live, true);
+    clearTimeout(fallback);
+    render(live, true); done = true;
   } catch (e) {
-    if (!SNAPSHOT) { $("verdict").textContent = "Couldn't reach the weather service. Try again in a minute."; $("status").textContent = "Offline"; }
+    clearTimeout(fallback);
+    if (!done) { done = true; render(SNAPSHOT, false); }
   }
 })();
 </script>
