@@ -63,6 +63,8 @@ p { margin: 0; }
 .row .big { grid-column: 2; grid-row: 1 / span 2; font-weight: 800; font-size: 26px; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
 .row .big small { display: block; white-space: nowrap; font-weight: 600; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-top: 3px; }
 .pow .big { color: var(--pow); } .groom .big { color: var(--groom); } .storm .big { color: var(--storm); }
+a.rl { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.35); transition: border-color .15s; }
+a.rl:hover, a.rl:focus-visible { border-bottom-color: #fff; }
 .empty { color: var(--dim); font-size: 14px; text-align: center; padding: 6px 0; }
 
 /* everyone else: fits the column, never scrolls sideways */
@@ -76,11 +78,14 @@ td.stc { text-align: left; white-space: nowrap; }
 .st { font-weight: 500; color: var(--dim); font-size: 13px; }
 .st.open { color: #052e16; background: var(--open); padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; box-shadow: 0 0 12px rgba(74,222,128,.45); }
 td .st + small { display: inline; color: var(--dim); font-weight: 400; font-size: 12px; margin-left: 6px; }
+td.rep { position: relative; } td.rep::after { content: ""; position: absolute; top: 6px; right: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--open); }
 td.heat { color: var(--fg); } td.h1 { background: rgba(125,211,252,.16); } td.h2 { background: rgba(125,211,252,.34); } td.h3 { background: rgba(125,211,252,.6); color: #082f49; font-weight: 700; }
 th { white-space: nowrap; }
-tr.grp th { border-top: 0; padding: 0 8px 2px; font-size: 10px; letter-spacing: .14em; color: var(--faint); }
-tr.grp th.fell { border-bottom: 1px solid rgba(255,255,255,.35); text-align: center; }
-tr.grp th.fc { border-bottom: 1px solid var(--storm); color: var(--storm); }
+tr.grp th { border-top: 0; padding: 0 4px 2px; font-size: 10px; letter-spacing: .06em; color: var(--faint); }
+tr.grp th.fell span, tr.grp th.fc span { display: block; position: relative; height: 15px; margin: 0 6px; border-bottom: 1px solid rgba(255,255,255,.35); }
+tr.grp th span i { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-style: normal; white-space: nowrap; }
+tr.grp th.fc { color: var(--storm); } tr.grp th.fc span { border-bottom-color: var(--storm); }
+th.num, td.num { width: 72px; min-width: 72px; max-width: 72px; text-align: center; padding-left: 4px; padding-right: 4px; }
 .only-sm { display: none; }
 .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; color: #0b1322; }
 .chip.pow { background: var(--pow); } .chip.groom { background: var(--groom); } .chip.storm { background: var(--storm); }
@@ -105,6 +110,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
   table { font-size: 13px; } th, td { padding: 8px 5px; }
   .hide-sm, .chip { display: none; } .only-sm { display: inline; }
   th { letter-spacing: .04em; font-size: 10px; } th, td { padding: 8px 4px; } td:first-child { padding-left: 2px; }
+  th.num, td.num { width: 42px; min-width: 42px; max-width: 42px; } tr.grp th { padding: 0 2px 2px; font-size: 9px; letter-spacing: .03em; } tr.grp th.fell span, tr.grp th.fc span { margin: 0 2px; }
   .legend { font-size: 11px; }
   td .st + small { display: none; }
   .stat b { font-size: 24px; } .stats { gap: 10px 22px; }
@@ -157,20 +163,21 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
     <div class="sec-head"><h2>Everyone else</h2><p>Every Western US Ikon mountain. Open ones first, then by what's coming.</p></div>
     <table>
       <thead>
-        <tr class="grp"><th></th><th></th><th colspan="2" class="fell">Fell</th><th class="fc">Forecast</th><th class="hide-md"></th></tr>
-        <tr><th>Resort</th><th style="text-align:left">Status</th><th>24h</th><th>72h</th><th>5&nbsp;day</th><th class="hide-md">Right now</th></tr>
+        <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i>Forecast</i></span></th><th class="hide-md"></th></tr>
+        <tr><th>Resort</th><th style="text-align:left">Status</th><th class="num">24h</th><th class="num">72h</th><th class="num">5&nbsp;day</th><th class="hide-md">Right now</th></tr>
       </thead>
       <tbody id="table-body"></tbody>
     </table>
-    <p class="legend">Inches of snow. "Fell" is what the weather model says came down; "Forecast" is what it expects over the next five days.</p>
+    <p class="legend">Inches of snow. For open resorts, "Recent" is the resort's own reported snowfall (green dot). For closed ones it's the weather model, counting only the part of today that's happened. "Forecast" is the model's next five days.</p>
   </section>
 
   <details>
     <summary>FAQ</summary>
     <div class="faq">
-      <div><h3>Where does the snow number come from?</h3><p>A weather model (Open-Meteo), sampled near each resort's upper mountain and refreshed daily. It's a forecast of snowfall, not the resort's official morning report, so treat it as "worth checking" rather than gospel. Resort reports usually read a bit higher.</p></div>
+      <div><h3>Where does the snow number come from?</h3><p>For open resorts, the recent snowfall is the resort's own morning report (via OnTheSnow), the same number on the sign at the base. For closed resorts, and for every forecast, it's a weather model (Open-Meteo) sampled near the upper mountain. Models are honest but conservative; resort reports usually read a bit higher.</p></div>
       <div><h3>How do you know what's open?</h3><p>Each morning we check SkiCentral's list of open ski areas. If a mountain isn't on it, we show its projected opening date from Ikon's own calendar. Closed mountains never make the Fresh tracks or Groomer lists, but they do show up in the storm forecast so you can plan.</p></div>
       <div><h3>How do you decide it's a groomer day?</h3><p>Under an inch of new snow in the last 24 hours, wind under about 20 mph, sunny or partly sunny, and a high above the low teens. Basically: sunglasses weather.</p></div>
+      <div><h3>Where do the resort links go?</h3><p>Tap any mountain's name to open its official snow report, the one the resort publishes each morning. Good for base depth, lift status and the number the lifties will quote you.</p></div>
       <div><h3>What's next?</h3><p>Blackout dates by pass tier, lift status, drive times from the Bay, and a "text the group chat" button. Keep checking.</p></div>
     </div>
   </details>
@@ -181,6 +188,37 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
 <script>
 const SNAPSHOT = /*__SNAPSHOT__*/null;
 
+// Each resort's own conditions page (checked Nov 2026; resorts move these now and then).
+const LINKS = {
+  "Palisades Tahoe": "https://www.palisadestahoe.com/mountain-information/mountain-report",
+  "Mammoth Mountain": "https://www.mammothmountain.com/on-the-mountain/mountain-report",
+  "June Mountain": "https://www.junemountain.com/mountain-information/mountain-report",
+  "Big Bear Mountain": "https://www.bigbearmountainresort.com/mountain-information",
+  "Jackson Hole": "https://www.jacksonhole.com/mountain-report",
+  "Alta": "https://www.alta.com/weather",
+  "Snowbird": "https://www.snowbird.com/mountain-report/",
+  "Solitude": "https://www.solitudemountain.com/mountain-and-village/conditions-and-maps",
+  "Brighton": "https://www.brightonresort.com/conditions",
+  "Deer Valley": "https://www.deervalley.com/explore-the-mountain/mountain-report",
+  "Snowbasin": "https://www.snowbasin.com/the-mountain/mountain-report/",
+  "Aspen Snowmass": "https://www.aspensnowmass.com/four-mountains/snow-report",
+  "Steamboat": "https://www.steamboat.com/the-mountain/mountain-report",
+  "Winter Park": "https://www.winterparkresort.com/the-mountain/mountain-report",
+  "Copper Mountain": "https://www.coppercolorado.com/the-mountain/conditions-weather/snow-report/",
+  "Arapahoe Basin": "https://www.arapahoebasin.com/snow-report/",
+  "Eldora": "https://www.eldora.com/the-mountain/current-conditions/snow-report-weather/",
+  "Big Sky": "https://www.bigskyresort.com/current-conditions",
+  "Sun Valley": "https://www.sunvalley.com/the-mountain/mountain-report",
+  "Schweitzer": "https://www.schweitzer.com/mountain-info/mountain-report",
+  "Crystal Mountain": "https://www.crystalmountainresort.com/the-mountain/mountain-report",
+  "Mt. Bachelor": "https://www.mtbachelor.com/the-mountain/mountain-report/",
+  "Taos Ski Valley": "https://www.skitaos.com/the-mountain/mountain-report",
+  "Sierra-at-Tahoe": "https://sierraattahoe.com/weather-snow-report/",
+  "Summit at Snoqualmie": "https://www.summitatsnoqualmie.com/mountain-report",
+  "Alyeska": "https://www.alyeskaresort.com/mountain-report-winter/"
+};
+const link = a => LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target="_blank" rel="noopener">${a.name}</a>` : a.name;
+
 const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
 const PAST = 3; // days of history in the data; index PAST is today
 
@@ -190,20 +228,33 @@ const fmtIn = n => (n < 0.05 ? "0" : n < 10 ? r1(n).toString().replace(/\.0$/, "
 const sum = a => a.reduce((s, x) => s + (x || 0), 0);
 const sky = c => c <= 1 ? "Sunny" : c <= 2 ? "Partly sunny" : c === 3 ? "Overcast" : c < 50 ? "Foggy" : c < 70 ? "Rain" : c < 80 ? "Snowing" : c < 90 ? "Showers" : "Snow showers";
 
+// How much of today (Pacific time) has elapsed, 0..1. Model numbers for "today" are a full-day forecast,
+// so we only count the part of the day that has actually happened.
+function dayFraction() {
+  const p = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(new Date());
+  const h = +p.find(x => x.type === "hour").value % 24, m = +p.find(x => x.type === "minute").value;
+  return Math.min(1, (h + m / 60) / 24);
+}
+
 function analyze(r) {
   const t = PAST;
-  const last24 = sum(r.snow.slice(t - 1, t + 1));      // yesterday + today
-  const last72 = sum(r.snow.slice(t - 2, t + 1));      // last 3 days incl. today
+  const frac = dayFraction();
+  const isOpenNow = r.status === "open" || (r.status !== "closed" && !!r.opens && r.days[t] >= r.opens);
+  const rep = r.report || {};
+  // Open resorts: use the resort's own reported snowfall when it has one. Everyone else: the weather model, today pro-rated.
+  const reported = isOpenNow && rep.last24 != null;
+  const last24 = reported ? rep.last24 : sum(r.snow.slice(t - 1, t)) + r.snow[t] * frac;
+  const last72 = reported && rep.last72 != null ? rep.last72 : sum(r.snow.slice(t - 2, t)) + r.snow[t] * frac;
   const next5 = sum(r.snow.slice(t + 1, t + 6));
   const next5Peak = Math.max(...r.snow.slice(t + 1, t + 6));
   const peakIdx = r.snow.slice(t + 1, t + 6).indexOf(next5Peak);
   const wind = r.wind[t], tmax = r.tmax[t], tmin = r.tmin[t], code = r.wcode[t];
-  const today = r.days[t];
-  const isOpen = r.status === "open" || (r.status !== "closed" && !!r.opens && today >= r.opens);
-  const groomerOk = isOpen && last24 < 1 && wind <= 20 && code <= 2 && tmax >= 15;
+  const isOpen = isOpenNow;
+  const noWx = !!r.wx_missing;
+  const groomerOk = isOpen && !noWx && last24 < 1 && wind <= 20 && code <= 2 && tmax >= 15;
   // groomer score: calmer, sunnier, warmer (but not slushy) = better
   const groomScore = groomerOk ? (20 - wind) + (code === 0 ? 12 : code === 1 ? 10 : code === 2 ? 6 : 0) + Math.max(0, 10 - Math.abs(tmax - 30) / 2) : -1;
-  return { ...r, last24, last72, next5, next5Peak, peakDay: r.days[t + 1 + Math.max(0, peakIdx)], wind, tmax, tmin, code, groomerOk, groomScore, isOpen };
+  return { ...r, last24, last72, next5, next5Peak, peakDay: r.days[t + 1 + Math.max(0, peakIdx)], wind, tmax, tmin, code, groomerOk, groomScore, isOpen, reported, noWx };
 }
 
 function shortName(a) { return a.name.replace(/ (Mountain|Ski Valley)$/, "").replace("Aspen Snowmass", "Aspen").replace("Palisades Tahoe", "Palisades").replace("Arapahoe Basin", "A-Basin").toUpperCase(); }
@@ -213,7 +264,7 @@ function dayName(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocale
 function longDay(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "long" }); }
 
 function rowHtml(kind, a, big, unit, why) {
-  return `<div class="row"><div class="name">${a.name}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
+  return `<div class="row"><div class="name">${link(a)}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
 }
 
 function render(data, live) {
@@ -238,7 +289,7 @@ function render(data, live) {
     : `<p class="empty">${open.length ? "No clean bluebird days at the open resorts. Wind or clouds." : "Nothing is open yet."}</p>`;
 
   // Storm's coming
-  const storm = all.filter(a => a.next5 >= 2).sort((a, b) => b.next5 - a.next5).slice(0, 5);
+  const storm = all.filter(a => !a.noWx && a.next5 >= 2).sort((a, b) => b.next5 - a.next5).slice(0, 5);
   $("list-storm").innerHTML = storm.length
     ? storm.map(a => rowHtml("storm", a, fmtIn(a.next5), "in / 5 days", `Biggest day ${longDay(a.peakDay)} (${fmtIn(a.next5Peak)}") · ${a.isOpen ? fmtIn(a.last72) + '" already down' : opensText(a)}`)).join("")
     : `<p class="empty">Nothing meaningful in the five-day forecast. High pressure, sorry.</p>`;
@@ -247,8 +298,8 @@ function render(data, live) {
   const tb = all.slice().sort((a, b) => (b.isOpen - a.isOpen) || ((b.next5 + b.last24) - (a.next5 + a.last24)));
   $("table-body").innerHTML = tb.map(a => {
     const chip = a.last24 >= 3 ? `<span class="chip pow">POW</span>` : a.groomerOk ? `<span class="chip groom">GROOM</span>` : a.next5 >= 6 ? `<span class="chip storm">STORM</span>` : "";
-    const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/,.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
-    return `<tr><td>${a.name}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="${heat(a.last24)}">${fmtIn(a.last24)}</td><td class="${heat(a.last72)}">${fmtIn(a.last72)}</td><td class="${heat(a.next5)}">${fmtIn(a.next5)}</td><td class="hide-md">${sky(a.code)} ${Math.round(a.tmax)}°</td></tr>`;
+    const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/, \d+" past.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
+    return `<tr><td>${link(a)}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
   }).join("");
 
   // Verdict
@@ -258,7 +309,7 @@ function render(data, live) {
   const rivalText = rivals.length ? ` ${rivals.map(a => a.name + " (" + fmtIn(a.last24) + '")').join(" and ")} ${rivals.length > 1 ? "are" : "is"} right there with it.` : "";
   if (best && best.last24 >= 6) { word = shortName(best); cls = "yes"; v = `<strong>${fmtIn(best.last24)}" in the last 24 hours</strong> and it's ${sky(best.code).toLowerCase()} up there.${rivalText || " Go."}`; }
   else if (best) { word = shortName(best); cls = "maybe"; v = `<strong>${fmtIn(best.last24)}" of new snow.</strong> Soft, not deep. Fun, not fall-line-face-shots fun.`; }
-  else if (bigStorm && bigStorm.next5 >= 6) { word = shortName(bigStorm); cls = "storm"; v = `<strong>Not yet, but soon.</strong> ${fmtIn(bigStorm.next5)}" on the way by ${longDay(bigStorm.peakDay)}. ${groom[0] ? "Meanwhile it's a groomer day at " + groom[0].name + "." : ""}`; }
+  else if (bigStorm && bigStorm.next5 >= 6) { word = "THOU HAST\nNO KING"; cls = "no"; v = `<strong>No fresh snow today,</strong> but ${bigStorm.name} is looking at ${fmtIn(bigStorm.next5)}" by ${longDay(bigStorm.peakDay)}${bigStorm.isOpen ? "" : " (" + opensText(bigStorm).replace("Opens", "opens") + ")"}. ${groom[0] ? "Meanwhile it's a groomer day at " + groom[0].name + "." : "The realm waits."}`; }
   else if (groom[0]) { word = "THOU HAST\nNO KING"; cls = "sky"; v = `<strong>No fresh snow, but it's bluebird at ${groom[0].name}:</strong> ${sky(groom[0].code).toLowerCase()}, ${Math.round(groom[0].tmax)}°, ${Math.round(groom[0].wind)} mph wind. Groomer day.`; }
   else if (!open.length) { word = "THOU HAST\nNO KING"; cls = "no"; v = `<strong>The lifts have not yet turned.</strong> First chairs spin ${(() => { const n = all.filter(a => a.opens).sort((a, b) => a.opens < b.opens ? -1 : 1)[0]; return n ? "at " + n.name + " on " + new Date(n.opens + "T12:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "soon"; })()}.`; }
   else { word = "THOU HAST\nNO KING"; cls = "no"; v = `<strong>No fresh snow, nothing big in the forecast.</strong> ${open.length <= 3 ? "Only " + open.map(a => a.name).join(" and ") + (open.length === 1 ? " is" : " are") + " spinning lifts anyway." : "Go for a bike ride and check back in a few days."} The realm waits.`; }
@@ -269,7 +320,7 @@ function render(data, live) {
   $("verdict").innerHTML = v;
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
-  const biggest = all.slice().sort((a, b) => b.next5 - a.next5)[0];
+  const biggest = all.filter(a => !a.noWx).sort((a, b) => b.next5 - a.next5)[0];
   $("s-open").innerHTML = `${open.length}<small>/ ${all.length}</small>`;
   $("s-open-note").textContent = open.length ? open.slice(0, 2).map(a => a.name.replace(" Mountain", "")).join(", ") + (open.length > 2 ? " +" + (open.length - 2) : "") : "Lifts closed";
   $("s-pow").innerHTML = deepest && deepest.last24 >= 0.05 ? `${fmtIn(deepest.last24)}<small>in</small>` : `0<small>in</small>`;
@@ -301,7 +352,7 @@ async function fetchLive(resorts) {
   if (!Array.isArray(d)) { if (d.error) throw new Error(d.reason); d = [d]; }
   return {
     updated: new Date().toISOString(),
-    resorts: resorts.map((r, i) => ({ ...r, days: d[i].daily.time, snow: d[i].daily.snowfall_sum, tmax: d[i].daily.temperature_2m_max, tmin: d[i].daily.temperature_2m_min, wind: d[i].daily.wind_speed_10m_max, wcode: d[i].daily.weather_code, pop: d[i].daily.precipitation_probability_max }))
+    resorts: resorts.map((r, i) => ({ ...r, wx_missing: false, days: d[i].daily.time, snow: d[i].daily.snowfall_sum, tmax: d[i].daily.temperature_2m_max, tmin: d[i].daily.temperature_2m_min, wind: d[i].daily.wind_speed_10m_max, wcode: d[i].daily.weather_code, pop: d[i].daily.precipitation_probability_max }))
   };
 }
 
