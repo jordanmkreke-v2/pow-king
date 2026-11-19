@@ -16,7 +16,6 @@
 <meta name="twitter:title" content="Who is today's pow king?">
 <meta name="twitter:description" content="Fresh snow, groomer days and storms across every U.S. Ikon resort. Updated daily.">
 <meta name="twitter:image" content="https://powking.io/og-image.png">
-<meta name="theme-color" content="#4f8cf7">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 84'%3E%3Cpath fill='%23f5c542' d='M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z'/%3E%3Crect fill='%23f5c542' x='10' y='70' width='100' height='10' rx='3'/%3E%3C/svg%3E">
 <title>Pow King</title>
 <style>
@@ -33,9 +32,10 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { background: var(--g1); min-height: 100%; }   /* phones tint the strip above the page with this colour, so it matches the top of the gradient */
-/* The gradient sits on a fixed, screen-sized layer. Painted on <html> it stretched with the page, so colours shifted whenever the page got longer or shorter. */
-body::before { content: ""; position: fixed; z-index: -1; top: -80px; left: 0; width: 100vw; height: calc(100vh + 160px); height: calc(100lvh + 160px); background: var(--bg) linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%) no-repeat; pointer-events: none; }
+/* Gradient is painted on the page itself (as originally, which is what phones draw behind the status bar and toolbar),
+   but at a fixed 2200px length instead of stretching to the page, so the colours are identical however long the page is.
+   Below 2200px it simply continues in the final grape colour. */
+html { background-color: var(--bg); background-image: linear-gradient(180deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%), linear-gradient(var(--g3), var(--g3)); background-repeat: no-repeat; background-size: 100% 2200px, 100% 100%; min-height: 100%; }
 body {
   margin: 0; min-height: 100%; color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5;
   background: transparent;
