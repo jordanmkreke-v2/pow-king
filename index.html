@@ -75,7 +75,7 @@ p { margin: 0; }
 .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; align-items: start; }
 .list { display: grid; gap: 8px; }
 .row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; background: var(--glass); border: 1px solid var(--edge); border-radius: 16px; padding: 10px 14px; min-width: 0; }
-.row .name { font-weight: 600; font-size: 15px; }
+.row .name { font-weight: 600; font-size: 15px; white-space: nowrap; }
 .row .name small { font-weight: 400; color: var(--dim); font-size: 12px; margin-left: 5px; }
 .row .why { color: var(--dim); font-size: 13px; grid-column: 1; }
 .row .big { grid-column: 2; grid-row: 1 / span 2; font-weight: 800; font-size: 26px; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
@@ -90,19 +90,20 @@ table { border-collapse: collapse; width: 100%; font-size: 14px; table-layout: a
 th, td { padding: 9px 8px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid rgba(255,255,255,.14); vertical-align: middle; }
 th { border-top: 0; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 600; padding-top: 2px; }
 th:first-child, td:first-child { text-align: left; padding-left: 4px; }
-td:first-child { font-weight: 600; }
+td:first-child { font-weight: 600; white-space: nowrap; }
 td:first-child small { color: var(--dim); font-weight: 400; margin-left: 5px; }
 td.stc { text-align: left; white-space: nowrap; }
 .st { font-weight: 500; color: var(--dim); font-size: 13px; }
 .st.open { color: #052e16; background: var(--open); padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; box-shadow: 0 0 12px rgba(74,222,128,.45); }
 td .st + small { display: inline; color: var(--dim); font-weight: 400; font-size: 12px; margin-left: 6px; }
-td.rep { position: relative; } td.rep::after { content: ""; position: absolute; top: 6px; right: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--open); }
+td.rep { position: relative; } td.rep::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--open); box-shadow: 0 0 6px var(--open); }
+.legend .key { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--open); box-shadow: 0 0 6px var(--open); vertical-align: middle; margin: 0 3px 2px 0; }
 td.heat { color: var(--fg); } td.h1 { background: rgba(125,211,252,.16); } td.h2 { background: rgba(125,211,252,.34); } td.h3 { background: rgba(125,211,252,.6); color: #082f49; font-weight: 700; }
 th { white-space: nowrap; }
 tr.grp th { border-top: 0; padding: 0 4px 2px; font-size: 10px; letter-spacing: .06em; color: var(--faint); }
-tr.grp th.fell span, tr.grp th.fc span { display: block; position: relative; height: 15px; margin: 0 6px; border-bottom: 1px solid rgba(255,255,255,.35); }
-tr.grp th span i { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-style: normal; white-space: nowrap; }
-tr.grp th.fc { color: var(--storm); } tr.grp th.fc span { border-bottom-color: var(--storm); }
+tr.grp th.fell > span, tr.grp th.fc > span { display: block; position: relative; height: 15px; margin: 0 6px; border-bottom: 1px solid rgba(255,255,255,.35); }
+tr.grp th > span > i { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-style: normal; white-space: nowrap; }
+tr.grp th.fc { color: var(--storm); } tr.grp th.fc > span { border-bottom-color: var(--storm); }
 th.num, td.num { width: 72px; min-width: 72px; max-width: 72px; text-align: center; padding-left: 4px; padding-right: 4px; }
 .only-sm { display: none; }
 .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; color: #0b1322; }
@@ -128,10 +129,10 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
   table { font-size: 13px; } th, td { padding: 8px 5px; }
   .hide-sm, .chip { display: none; } .only-sm { display: inline; }
   th { letter-spacing: .04em; font-size: 10px; } th, td { padding: 8px 4px; } td:first-child { padding-left: 2px; }
-  th.num, td.num { width: 42px; min-width: 42px; max-width: 42px; } tr.grp th { padding: 0 2px 2px; font-size: 9px; letter-spacing: .03em; } tr.grp th.fell span, tr.grp th.fc span { margin: 0 2px; }
+  th.num, td.num { width: 42px; min-width: 42px; max-width: 42px; } tr.grp th { padding: 0 2px 2px; font-size: 9px; letter-spacing: .03em; } tr.grp th.fell > span, tr.grp th.fc > span { margin: 0 2px; }
   .legend { font-size: 11px; }
   td .st + small { display: none; }
-  .stat b { font-size: 24px; } .stats { gap: 10px 22px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; } .stat { min-width: 0; } .stat b { font-size: 24px; } .stat span { font-size: 10px; letter-spacing: .06em; } .stat em { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .word.yes, .word.maybe, .word.no, .word.sky, .word.storm { animation: pulse 2.4s ease-in-out infinite; }
@@ -184,12 +185,12 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
     <div class="sec-head"><h2>Everyone else</h2><p>Every Western US Ikon mountain. Open ones first, then by what's coming.</p></div>
     <table>
       <thead>
-        <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i>Forecast</i></span></th><th class="hide-md"></th></tr>
+        <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i><span class="hide-sm">Forecast</span><span class="only-sm">Fcst</span></i></span></th><th class="hide-md"></th></tr>
         <tr><th>Resort</th><th style="text-align:left">Status</th><th class="num">24h</th><th class="num">72h</th><th class="num">5&nbsp;day</th><th class="hide-md">Right now</th></tr>
       </thead>
       <tbody id="table-body"></tbody>
     </table>
-    <p class="legend">Inches of snow. For open resorts, "Recent" is the larger of the resort's own fresh morning report (green dot) and the weather model. For closed ones it's the model alone, counting only the part of today that's happened. "Forecast" is the model's next five days.</p>
+    <p class="legend">Inches of snow. "Recent" is the weather model, counting only the part of today that's happened; at open resorts we also check the resort's own morning report and show whichever is larger. <span class="key"></span>means the resort's own number is the one shown. "Forecast" is the model's next five days.</p>
   </section>
 
   <details>
@@ -238,7 +239,14 @@ const LINKS = {
   "Summit at Snoqualmie": "https://www.summitatsnoqualmie.com/mountain-report",
   "Alyeska": "https://www.alyeskaresort.com/mountain-report-winter/"
 };
-const link = a => LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target="_blank" rel="noopener">${a.name}</a>` : a.name;
+// Short names for the cards and for phone-width tables, so no resort ever wraps onto two lines.
+const SHORT = { "Mammoth Mountain": "Mammoth", "Summit at Snoqualmie": "Snoqualmie", "Big Bear Mountain": "Big Bear", "Crystal Mountain": "Crystal", "Taos Ski Valley": "Taos", "Aspen Snowmass": "Aspen", "Copper Mountain": "Copper", "Arapahoe Basin": "A-Basin", "Palisades Tahoe": "Palisades", "Sierra-at-Tahoe": "Sierra", "Mt. Bachelor": "Bachelor", "June Mountain": "June" };
+const shortOf = a => SHORT[a.name] || a.name;
+// mode: "full" (desktop table), "short" (cards), "auto" (full on desktop, short on phones)
+const link = (a, mode = "full") => {
+  const label = mode === "short" ? shortOf(a) : mode === "auto" ? `<span class="hide-sm">${a.name}</span><span class="only-sm">${shortOf(a)}</span>` : a.name;
+  return LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target="_blank" rel="noopener" title="${a.name} snow report">${label}</a>` : label;
+};
 
 const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
 const PAST = 3; // days of history in the data; index PAST is today
@@ -272,7 +280,12 @@ function analyze(r) {
   const repAgeH = rep.updated ? (Date.now() - new Date(rep.updated).getTime()) / 36e5 : Infinity;
   const fresh = isOpenNow && rep.last24 != null && repAgeH <= REPORT_MAX_AGE_H;
   const last24 = fresh ? Math.max(rep.last24, model24) : model24;
-  const last72 = fresh && rep.last72 != null ? Math.max(rep.last72, model72) : model72;
+  // 72h: a report up to two days old still covers most of the window, so add the model's snow since it was posted and
+  // compare that with the model's own 3-day sum. Models tend to miss the lighter days, so the larger number wins.
+  const repDay = rep.updated ? new Date(rep.updated).toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }) : null;
+  const sinceRep = repDay ? r.days.reduce((s, d, i) => s + (i <= t && d > repDay ? (i === t ? r.snow[i] * frac : r.snow[i]) : 0), 0) : 0;
+  const rep72 = isOpenNow && rep.last72 != null && repAgeH <= 48 ? rep.last72 + sinceRep : null;
+  const last72 = Math.max(model72, rep72 ?? 0, fresh ? last24 : 0);
   const reported = fresh && rep.last24 >= model24;   // green dot: the resort's number is the one shown
   const next5 = sum(r.snow.slice(t + 1, t + 6));
   const next5Peak = Math.max(...r.snow.slice(t + 1, t + 6));
@@ -293,7 +306,7 @@ function dayName(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocale
 function longDay(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "long" }); }
 
 function rowHtml(kind, a, big, unit, why) {
-  return `<div class="row"><div class="name">${link(a)}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
+  return `<div class="row"><div class="name">${link(a, "short")}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
 }
 
 function render(data, live) {
@@ -309,7 +322,7 @@ function render(data, live) {
   $("list-pow").innerHTML = (pow.length
     ? pow.map(a => rowHtml("pow", a, fmtIn(a.last24), "in / 24h", `${fmtIn(a.last72)}" over 3 days · ${sky(a.code)}, ${Math.round(a.tmax)}°, wind ${Math.round(a.wind)} mph`)).join("")
     : `<p class="empty">No open resort got 3"+ in the last 24 hours. ${dusting.length ? "A dusting at " + dusting.map(a => a.name).join(", ") + "." : "Dry at the open hills."}</p>`)
-    + (closedPow.length ? `<p class="empty">Snowing on closed lifts: ${closedPow.map(a => `${a.name} ${fmtIn(a.last24)}" (${opensText(a)})`).join(", ")}.</p>` : "");
+    + (closedPow.length ? `<p class="empty">Snowing on closed lifts: ${closedPow.slice(0, 4).map(a => `${shortOf(a)} ${fmtIn(a.last24)}" (${opensText(a).replace("Opens ", "")})`).join(", ")}${closedPow.length > 4 ? ` and ${closedPow.length - 4} more` : ""}.</p>` : "");
 
   // Groomer day
   const groom = all.filter(a => a.groomerOk).sort((a, b) => b.groomScore - a.groomScore).slice(0, 5);
@@ -328,7 +341,7 @@ function render(data, live) {
   $("table-body").innerHTML = tb.map(a => {
     const chip = a.last24 >= 3 ? `<span class="chip pow">POW</span>` : a.groomerOk ? `<span class="chip groom">GROOM</span>` : a.next5 >= 6 ? `<span class="chip storm">STORM</span>` : "";
     const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/, \d+" past.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
-    return `<tr><td>${link(a)}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
+    return `<tr><td>${link(a, "auto")}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
   }).join("");
 
   // Verdict
@@ -351,7 +364,7 @@ function render(data, live) {
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
   const biggest = all.filter(a => !a.noWx).sort((a, b) => b.next5 - a.next5)[0];
   $("s-open").innerHTML = `${open.length}<small>/ ${all.length}</small>`;
-  $("s-open-note").textContent = open.length ? open.slice(0, 2).map(a => a.name.replace(" Mountain", "")).join(", ") + (open.length > 2 ? " +" + (open.length - 2) : "") : "Lifts closed";
+  $("s-open-note").textContent = open.length ? shortOf(open[0]) + (open.length > 1 ? " +" + (open.length - 1) + " more" : "") : "Lifts closed";
   $("s-pow").innerHTML = deepest && deepest.last24 >= 0.05 ? `${fmtIn(deepest.last24)}<small>in</small>` : `0<small>in</small>`;
   $("s-pow-note").textContent = deepest && deepest.last24 >= 0.05 ? deepest.name : "Dry at open resorts";
   $("s-storm").innerHTML = biggest && biggest.next5 >= 0.05 ? `${fmtIn(biggest.next5)}<small>in</small>` : `0<small>in</small>`;
