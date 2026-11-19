@@ -189,13 +189,13 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       </thead>
       <tbody id="table-body"></tbody>
     </table>
-    <p class="legend">Inches of snow. For open resorts, "Recent" is the resort's own reported snowfall (green dot). For closed ones it's the weather model, counting only the part of today that's happened. "Forecast" is the model's next five days.</p>
+    <p class="legend">Inches of snow. For open resorts, "Recent" is the larger of the resort's own fresh morning report (green dot) and the weather model. For closed ones it's the model alone, counting only the part of today that's happened. "Forecast" is the model's next five days.</p>
   </section>
 
   <details>
     <summary>FAQ</summary>
     <div class="faq">
-      <div><h3>Where does the snow number come from?</h3><p>For open resorts, the recent snowfall is the resort's own morning report (via OnTheSnow), the same number on the sign at the base. For closed resorts, and for every forecast, it's a weather model (Open-Meteo) sampled near the upper mountain. Models are honest but conservative; resort reports usually read a bit higher.</p></div>
+      <div><h3>Where does the snow number come from?</h3><p>For open resorts, we look at two numbers side by side: the resort's own morning report (via OnTheSnow), the same number on the sign at the base, and a weather model (Open-Meteo) sampled near the upper mountain. We show whichever is larger, and we stop trusting a resort report once it's about 20 hours old, so a 7am "0 new" can't hide a storm that's been dumping all day. Closed resorts, and every forecast, use the model alone.</p></div>
       <div><h3>How do you know what's open?</h3><p>Each morning we check SkiCentral's list of open ski areas. If a mountain isn't on it, we show its projected opening date from Ikon's own calendar. Closed mountains never make the Fresh tracks or Groomer lists, but they do show up in the storm forecast so you can plan.</p></div>
       <div><h3>How do you decide it's a groomer day?</h3><p>Under an inch of new snow in the last 24 hours, wind under about 20 mph, sunny or partly sunny, and a high above the low teens. Basically: sunglasses weather.</p></div>
       <div><h3>Where do the resort links go?</h3><p>Tap any mountain's name to open its official snow report, the one the resort publishes each morning. Good for base depth, lift status and the number the lifties will quote you.</p></div>
@@ -242,6 +242,7 @@ const link = a => LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target=
 
 const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
 const PAST = 3; // days of history in the data; index PAST is today
+const REPORT_MAX_AGE_H = 20; // resort reports older than this are treated as stale and the model takes over
 
 const $ = id => document.getElementById(id);
 const r1 = n => Math.round(n * 10) / 10;
@@ -262,10 +263,17 @@ function analyze(r) {
   const frac = dayFraction();
   const isOpenNow = r.status === "open" || (r.status !== "closed" && !!r.opens && r.days[t] >= r.opens);
   const rep = r.report || {};
-  // Open resorts: use the resort's own reported snowfall when it has one. Everyone else: the weather model, today pro-rated.
-  const reported = isOpenNow && rep.last24 != null;
-  const last24 = reported ? rep.last24 : sum(r.snow.slice(t - 1, t)) + r.snow[t] * frac;
-  const last72 = reported && rep.last72 != null ? rep.last72 : sum(r.snow.slice(t - 2, t)) + r.snow[t] * frac;
+  // Weather model, with today pro-rated to the part of the day that has happened.
+  const model24 = sum(r.snow.slice(t - 1, t)) + r.snow[t] * frac;
+  const model72 = sum(r.snow.slice(t - 2, t)) + r.snow[t] * frac;
+  // Open resorts: the resort's own morning report, used alongside the model. A report is only trusted while it's fresh
+  // (under REPORT_MAX_AGE_H old); a stale one is yesterday's sign at the base. We then show the larger of the two, so a
+  // 7am "0 new" never hides a storm that's been dumping since, and a resort stake that reads higher than the model wins.
+  const repAgeH = rep.updated ? (Date.now() - new Date(rep.updated).getTime()) / 36e5 : Infinity;
+  const fresh = isOpenNow && rep.last24 != null && repAgeH <= REPORT_MAX_AGE_H;
+  const last24 = fresh ? Math.max(rep.last24, model24) : model24;
+  const last72 = fresh && rep.last72 != null ? Math.max(rep.last72, model72) : model72;
+  const reported = fresh && rep.last24 >= model24;   // green dot: the resort's number is the one shown
   const next5 = sum(r.snow.slice(t + 1, t + 6));
   const next5Peak = Math.max(...r.snow.slice(t + 1, t + 6));
   const peakIdx = r.snow.slice(t + 1, t + 6).indexOf(next5Peak);
