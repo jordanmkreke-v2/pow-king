@@ -32,14 +32,16 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { background: var(--bg) linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%) no-repeat; background-size: 100% 100%; min-height: 100%; }
+html { background: var(--g2); min-height: 100%; }
+/* The gradient sits on a fixed, screen-sized layer. Painted on <html> it stretched with the page, so colours shifted whenever the page got longer or shorter. */
+body::before { content: ""; position: fixed; z-index: -1; top: 0; left: 0; width: 100vw; height: 100vh; height: 100lvh; background: var(--bg) linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%) no-repeat; pointer-events: none; }
 body {
   margin: 0; min-height: 100%; color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5;
   background: transparent;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 56px 48px; text-align: center;
 }
-main { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; justify-items: center; opacity: 0; transition: opacity .45s ease; }
+main { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; justify-items: center; opacity: 0; transition: opacity .45s ease; }
 main.ready { opacity: 1; }
 h1 { font-size: clamp(22px, 4.5vw, 38px); font-weight: 300; letter-spacing: .12em; text-transform: uppercase; margin: 0; opacity: .92; text-wrap: balance; }
 h2 { font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -49,14 +51,15 @@ p { margin: 0; }
 .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .crown[hidden] { display: none !important; }
 .crown { transform: rotate(-6deg); width: clamp(56px, 9vw, 92px); height: auto; filter: drop-shadow(0 0 18px rgba(255,214,90,.75)); margin-bottom: -6px; }
-.word { white-space: pre-line; font-size: clamp(72px, 20vw, 150px); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 8px 0 0; }
+.hero { display: grid; justify-items: center; align-content: center; width: 100%; }
+.word { white-space: pre; font-size: clamp(72px, 20vw, 150px); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 8px 0 0; }
 .word.yes { color: var(--yes); text-shadow: 0 0 30px rgba(74,222,128,.55); }
 .word.maybe { color: var(--maybe); text-shadow: 0 0 30px rgba(251,191,36,.55); }
 .word.no { color: var(--no); text-shadow: 0 0 30px rgba(248,113,113,.55); }
 .word.sky { color: var(--sky); text-shadow: 0 0 30px rgba(125,211,252,.55); }
 .word.storm { color: var(--storm); text-shadow: 0 0 30px rgba(196,181,253,.6); }
 .word.loading { color: var(--faint); }
-.verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; }
+.verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; min-height: 3em; }
 .verdict strong { font-weight: 700; }
 .stats { display: flex; gap: 12px 40px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
 .stat { display: grid; gap: 2px; min-width: 120px; }
@@ -65,7 +68,13 @@ p { margin: 0; }
 .stat span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
 .stat em { font-style: normal; font-size: 13px; color: var(--dim); }
 .status { font-size: 13px; color: var(--faint); display: inline-flex; gap: 8px; align-items: center; }
-.scope { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+.scope { display: grid; justify-items: center; margin-top: 4px; width: 100%; }
+/* Region picker slides open under the toggle instead of popping in beside it and shoving the toggle sideways. */
+.regwrap { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows .22s ease, opacity .18s ease, visibility 0s .22s; }
+.regwrap.on { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition: grid-template-rows .22s ease, opacity .2s ease .04s, visibility 0s; }
+.regwrap > div { overflow: hidden; min-height: 0; padding: 0 4px; }
+.regwrap .regsel { margin: 10px 0 4px; }
+@media (prefers-reduced-motion: reduce) { .regwrap, .regwrap.on { transition: none; } }
 .seg { display: inline-flex; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 4px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .seg button { border: 0; background: transparent; color: var(--dim); font: 600 14px var(--font); padding: 0 18px; min-height: 40px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s; }
 .seg button[aria-pressed="true"] { background: #fff; color: #3b2d8f; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
@@ -124,6 +133,23 @@ th.num, td.num { width: 72px; min-width: 72px; max-width: 72px; text-align: cent
 .chip.pow { background: var(--pow); } .chip.groom { background: var(--groom); } .chip.storm { background: var(--storm); }
 .legend { font-size: 12px; color: var(--dim); text-align: center; }
 
+/* email signup */
+.signup[hidden] { display: none; }
+.signup { text-align: center; justify-items: center; gap: 14px; padding: 24px 18px; }
+.signup h2 { color: #ffe9a3; }
+.signup form { display: flex; gap: 8px; width: 100%; max-width: 460px; }
+.signup input[type="email"] { flex: 1; min-width: 0; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.4); background: var(--glass-2); color: var(--fg); font: 500 16px var(--font); }
+.signup input[type="email"]::placeholder { color: var(--dim); }
+.signup button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: #fff; color: #3b2d8f; font: 700 15px var(--font); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,.15); transition: transform .15s; }
+.signup button:hover:not(:disabled) { transform: translateY(-1px); }
+.signup button:disabled { opacity: .6; cursor: default; }
+.signup form[hidden] { display: none; }
+.signup .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.signup .msg { font-size: 14px; color: var(--dim); min-height: 21px; }
+.signup .msg.ok { color: var(--yes); font-weight: 600; }
+.signup .msg.err { color: #fecaca; }
+@media (max-width: 560px) { .signup form { flex-direction: column; } }
+
 details { width: 100%; max-width: 560px; }
 summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px); transition: background .2s; }
 summary::-webkit-details-marker { display: none; }
@@ -147,6 +173,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
   .legend { font-size: 11px; }
   td .st + small { display: none; }
   .seg button { padding: 0 14px; } .regsel select { font-size: 14px; padding-left: 16px; }
+  .verdict { min-height: 4.5em; }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; } .stat { min-width: 0; } .stat b { font-size: 24px; } .stat span { font-size: 10px; letter-spacing: .06em; } .stat em { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -164,6 +191,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
   <header style="display:grid;gap:10px;justify-items:center">
     <p class="eyebrow">Ikon Pass · <span id="scope-label">All U.S.</span> · <span id="today-label">today</span></p>
     <h1>Who is today's pow king?</h1>
+    <div class="hero" id="hero">
     <svg class="crown" id="crown" hidden viewBox="0 0 120 84" aria-hidden="true">
       <defs><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".55" stop-color="#f5c542"/><stop offset="1" stop-color="#d9960f"/></linearGradient></defs>
       <path fill="url(#gold)" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/>
@@ -172,6 +200,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       <circle fill="#7dd3fc" cx="36" cy="60" r="4.5"/><circle fill="#f87171" cx="60" cy="58" r="5.5"/><circle fill="#7dd3fc" cx="84" cy="60" r="4.5"/>
     </svg>
     <p class="word loading" id="word"></p>
+    </div>
     <p class="verdict" id="verdict">Checking the mountains…</p>
     <div class="stats">
       <div class="stat"><b id="s-open">–</b><span>Resorts open</span><em id="s-open-note">&nbsp;</em></div>
@@ -183,7 +212,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
         <button type="button" id="seg-all" aria-pressed="true">All U.S.</button>
         <button type="button" id="seg-region" aria-pressed="false">By region</button>
       </div>
-      <label class="regsel" id="regsel" hidden><span class="sr">Region</span><select id="region"></select><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></label>
+      <div class="regwrap" id="regwrap"><div><label class="regsel" id="regsel"><span class="sr">Region</span><select id="region"></select><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></label></div></div>
     </div>
     <p class="status"><span class="dot" id="dot"></span><span id="status">Loading snow data</span></p>
   </header>
@@ -202,6 +231,17 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       <div class="list" id="list-storm"></div>
     </section>
   </div>
+
+  <section class="glass signup" id="signup" hidden>
+    <div class="sec-head"><h2><svg viewBox="0 0 120 84" aria-hidden="true"><path fill="currentColor" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/><rect fill="currentColor" x="10" y="70" width="100" height="10" rx="3"/></svg> Get the royal decree</h2><p>Powder alerts are coming. Get on the list and be first to know when it dumps.</p></div>
+    <form id="signup-form" method="post" target="_blank" novalidate>
+      <label class="sr" for="signup-email">Email address</label>
+      <input type="email" id="signup-email" name="email_address" placeholder="you@email.com" autocomplete="email" inputmode="email" required>
+      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" id="signup-btn">Count me in</button>
+    </form>
+    <p class="msg" id="signup-msg" role="status">No spam. Unsubscribe any time.</p>
+  </section>
 
   <section class="glass">
     <div class="sec-head"><h2 id="table-title">Everyone else</h2><p id="table-sub">Every U.S. Ikon mountain. Open ones first, then by what's coming.</p></div>
@@ -371,9 +411,10 @@ function render(data, live) {
   $("scope-label").textContent = scope.mode === "region" ? region.name : "All U.S.";
   $("seg-all").setAttribute("aria-pressed", scope.mode === "all"); $("seg-region").setAttribute("aria-pressed", scope.mode === "region");
   const sel = $("region");
-  sel.innerHTML = REGIONS.map(g => { const n = everything.filter(a => regionOf(a).id === g.id); return `<option value="${g.id}">${g.name} · ${n.length} resorts, ${n.filter(a => a.isOpen).length} open</option>`; }).join("");
+  const opts = REGIONS.map(g => { const n = everything.filter(a => regionOf(a).id === g.id); return `<option value="${g.id}">${g.name} · ${n.length} resorts, ${n.filter(a => a.isOpen).length} open</option>`; }).join("");
+  if (sel.dataset.opts !== opts) { sel.innerHTML = opts; sel.dataset.opts = opts; }   // only rebuild the menu when its text changes
   sel.value = region.id;
-  if (scope.mode === "region") $("regsel").removeAttribute("hidden"); else $("regsel").setAttribute("hidden", "");
+  $("regwrap").classList.toggle("on", scope.mode === "region");
   $("table-title").textContent = scope.mode === "region" ? "Everyone else · " + region.name : "Everyone else";
   $("table-sub").textContent = scope.mode === "region" ? `All ${all.length} ${region.name} Ikon mountains (${region.sub}). Open ones first, then by what's coming.` : `Every U.S. Ikon mountain, by region. Open ones first, then by what's coming.`;
 
@@ -424,7 +465,7 @@ function render(data, live) {
   // Colour rule: a resort name is blue (and wears the crown); NOBODY is red.
   const named = !word.startsWith("THOU HAST");
   if (named) $("crown").removeAttribute("hidden"); else $("crown").setAttribute("hidden", "");
-  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); $("word").style.fontSize = `min(140px, ${(118 / Math.max(...word.split("\n").map(l => l.length))).toFixed(1)}vw)`;
+  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); fitWord();
   $("verdict").innerHTML = v;
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
@@ -464,12 +505,55 @@ async function fetchLive(resorts) {
   };
 }
 
+// Size the big name to the space it has. The crown + name box is one fixed height per screen width, so the header
+// (and the toggle under it) stays put whether the king is ALTA, MAMMOTH or nobody; long names shrink to fit the width.
+function fitWord() {
+  const el = $("word"), hero = $("hero"), vw = document.documentElement.clientWidth;
+  const crownH = Math.min(92, Math.max(56, vw * 0.09)), oneLine = Math.min(140, vw * 0.24), boxH = Math.round(crownH + oneLine + 8);
+  hero.style.height = boxH + "px";
+  const lines = el.textContent.split("\n").length;
+  let size = lines > 1 ? Math.min(118, (boxH - 28) / lines) : oneLine;
+  el.style.fontSize = size + "px";
+  const room = Math.min(860, vw - 32) * 0.94;         // column width, less a little room for the pulse animation
+  if (el.offsetWidth > room) el.style.fontSize = (size * room / el.offsetWidth).toFixed(1) + "px";
+}
+let fitQueued = false;
+addEventListener("resize", () => { if (fitQueued) return; fitQueued = true; requestAnimationFrame(() => { fitQueued = false; if (lastData) fitWord(); }); });
+
 const reveal = () => document.querySelector("main").classList.add("ready");
 
 const rerender = () => { saveScope(); if (lastData) render(lastData, lastLive); };
 $("seg-all").addEventListener("click", () => { scope.mode = "all"; rerender(); });
 $("seg-region").addEventListener("click", () => { scope.mode = "region"; rerender(); });
 $("region").addEventListener("change", e => { scope.region = e.target.value; scope.mode = "region"; rerender(); });
+
+// ---- Email signup ----
+// Paste the form's "action" URL from Kit between the quotes, e.g. "https://app.kit.com/forms/1234567/subscriptions".
+// While this is empty the signup box stays hidden, so the page is safe to publish either way.
+const SIGNUP_URL = "";
+if (/^https:\/\//.test(SIGNUP_URL)) {
+  const form = $("signup-form"), msg = $("signup-msg"), btn = $("signup-btn"), input = $("signup-email");
+  form.action = SIGNUP_URL;
+  $("signup").removeAttribute("hidden");
+  const say = (text, cls) => { msg.textContent = text; msg.className = "msg" + (cls ? " " + cls : ""); };
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = input.value.trim();
+    if (form.website.value) return;                                  // bots fill the hidden field; people can't see it
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("That email doesn't look right. Try again?", "err"); input.focus(); return; }
+    btn.disabled = true; say("Adding you…");
+    const body = new FormData(); body.append("email_address", email);
+    try {
+      try { await fetch(SIGNUP_URL, { method: "POST", body, headers: { Accept: "application/json" } }); }
+      catch (err) { await fetch(SIGNUP_URL, { method: "POST", body, mode: "no-cors" }); }   // still delivers if the reply is blocked
+      form.hidden = true;
+      say("You're on the list. Check your inbox to confirm.", "ok");
+    } catch (err) {
+      btn.disabled = false;
+      say("Couldn't reach the list just now. Try again in a minute.", "err");
+    }
+  });
+}
 
 (async () => {
   // Render once: wait briefly for live weather, otherwise fall back to the baked-in snapshot.
