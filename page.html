@@ -14,14 +14,17 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { background: var(--bg) linear-gradient(135deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%) no-repeat; background-size: 100% 100%; min-height: 100%; }
+/* Gradient is painted on the page itself (as originally, which is what phones draw behind the status bar and toolbar),
+   but at a fixed 2200px length instead of stretching to the page, so the colours are identical however long the page is.
+   Below 2200px it simply continues in the final grape colour. */
+html { background-color: var(--bg); background-image: linear-gradient(180deg, var(--g1) 0%, var(--g2) 55%, var(--g3) 100%), linear-gradient(var(--g3), var(--g3)); background-repeat: no-repeat; background-size: 100% 2200px, 100% 100%; min-height: 100%; }
 body {
   margin: 0; min-height: 100%; color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5;
   background: transparent;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 56px 48px; text-align: center;
 }
-main { max-width: 860px; margin: 0 auto; display: grid; gap: 28px; justify-items: center; opacity: 0; transition: opacity .45s ease; }
+main { max-width: 860px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; justify-items: center; opacity: 0; transition: opacity .45s ease; }
 main.ready { opacity: 1; }
 h1 { font-size: clamp(22px, 4.5vw, 38px); font-weight: 300; letter-spacing: .12em; text-transform: uppercase; margin: 0; opacity: .92; text-wrap: balance; }
 h2 { font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -31,14 +34,15 @@ p { margin: 0; }
 .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .crown[hidden] { display: none !important; }
 .crown { transform: rotate(-6deg); width: clamp(56px, 9vw, 92px); height: auto; filter: drop-shadow(0 0 18px rgba(255,214,90,.75)); margin-bottom: -6px; }
-.word { white-space: pre-line; font-size: clamp(72px, 20vw, 150px); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 8px 0 0; }
+.hero { display: grid; justify-items: center; align-content: center; width: 100%; }
+.word { white-space: pre; font-size: clamp(72px, 20vw, 150px); font-weight: 900; letter-spacing: -.04em; line-height: 1; margin: 8px 0 0; }
 .word.yes { color: var(--yes); text-shadow: 0 0 30px rgba(74,222,128,.55); }
 .word.maybe { color: var(--maybe); text-shadow: 0 0 30px rgba(251,191,36,.55); }
 .word.no { color: var(--no); text-shadow: 0 0 30px rgba(248,113,113,.55); }
 .word.sky { color: var(--sky); text-shadow: 0 0 30px rgba(125,211,252,.55); }
 .word.storm { color: var(--storm); text-shadow: 0 0 30px rgba(196,181,253,.6); }
 .word.loading { color: var(--faint); }
-.verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; }
+.verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; min-height: 3em; }
 .verdict strong { font-weight: 700; }
 .stats { display: flex; gap: 12px 40px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
 .stat { display: grid; gap: 2px; min-width: 120px; }
@@ -47,6 +51,26 @@ p { margin: 0; }
 .stat span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
 .stat em { font-style: normal; font-size: 13px; color: var(--dim); }
 .status { font-size: 13px; color: var(--faint); display: inline-flex; gap: 8px; align-items: center; }
+.scope { display: grid; justify-items: center; margin-top: 4px; width: 100%; }
+/* Region picker slides open under the toggle instead of popping in beside it and shoving the toggle sideways. */
+.regwrap { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows .22s ease, opacity .18s ease, visibility 0s .22s; }
+.regwrap.on { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition: grid-template-rows .22s ease, opacity .2s ease .04s, visibility 0s; }
+.regwrap > div { overflow: hidden; min-height: 0; padding: 0 4px; }
+.regwrap .regsel { margin: 10px 0 4px; }
+@media (prefers-reduced-motion: reduce) { .regwrap, .regwrap.on { transition: none; } }
+.seg { display: inline-flex; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 4px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.seg button { border: 0; background: transparent; color: var(--dim); font: 600 14px var(--font); padding: 0 18px; min-height: 40px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s; }
+.seg button[aria-pressed="true"] { background: #fff; color: #3b2d8f; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+.seg button:hover:not([aria-pressed="true"]) { color: var(--fg); }
+.regsel { position: relative; display: inline-flex; align-items: center; }
+.regsel[hidden] { display: none; }
+.regsel select { appearance: none; -webkit-appearance: none; background: var(--glass-2); border: 1px solid rgba(255,255,255,.4); border-radius: 999px; color: var(--fg); font: 600 15px var(--font); padding: 0 40px 0 20px; min-height: 48px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.regsel select option { color: #111; }
+.regsel svg { position: absolute; right: 14px; width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+tr.rg th { text-align: left; padding: 14px 4px 4px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--groom); border-top: 1px solid rgba(255,255,255,.14); }
+tr.rg th span { font-weight: 500; color: var(--faint); letter-spacing: 0; text-transform: none; margin-left: 6px; }
+tr.rg:first-child th { border-top: 0; padding-top: 4px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); display: inline-block; }
 .dot.live { background: var(--yes); box-shadow: 0 0 10px var(--yes); }
 
@@ -57,7 +81,7 @@ p { margin: 0; }
 .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; align-items: start; }
 .list { display: grid; gap: 8px; }
 .row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; background: var(--glass); border: 1px solid var(--edge); border-radius: 16px; padding: 10px 14px; min-width: 0; }
-.row .name { font-weight: 600; font-size: 15px; }
+.row .name { font-weight: 600; font-size: 15px; white-space: nowrap; }
 .row .name small { font-weight: 400; color: var(--dim); font-size: 12px; margin-left: 5px; }
 .row .why { color: var(--dim); font-size: 13px; grid-column: 1; }
 .row .big { grid-column: 2; grid-row: 1 / span 2; font-weight: 800; font-size: 26px; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
@@ -72,24 +96,42 @@ table { border-collapse: collapse; width: 100%; font-size: 14px; table-layout: a
 th, td { padding: 9px 8px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid rgba(255,255,255,.14); vertical-align: middle; }
 th { border-top: 0; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 600; padding-top: 2px; }
 th:first-child, td:first-child { text-align: left; padding-left: 4px; }
-td:first-child { font-weight: 600; }
+td:first-child { font-weight: 600; white-space: nowrap; }
 td:first-child small { color: var(--dim); font-weight: 400; margin-left: 5px; }
 td.stc { text-align: left; white-space: nowrap; }
 .st { font-weight: 500; color: var(--dim); font-size: 13px; }
 .st.open { color: #052e16; background: var(--open); padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; box-shadow: 0 0 12px rgba(74,222,128,.45); }
 td .st + small { display: inline; color: var(--dim); font-weight: 400; font-size: 12px; margin-left: 6px; }
-td.rep { position: relative; } td.rep::after { content: ""; position: absolute; top: 6px; right: 6px; width: 4px; height: 4px; border-radius: 50%; background: var(--open); }
+td.rep { position: relative; } td.rep::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--open); box-shadow: 0 0 6px var(--open); }
+.legend .key { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--open); box-shadow: 0 0 6px var(--open); vertical-align: middle; margin: 0 3px 2px 0; }
 td.heat { color: var(--fg); } td.h1 { background: rgba(125,211,252,.16); } td.h2 { background: rgba(125,211,252,.34); } td.h3 { background: rgba(125,211,252,.6); color: #082f49; font-weight: 700; }
 th { white-space: nowrap; }
 tr.grp th { border-top: 0; padding: 0 4px 2px; font-size: 10px; letter-spacing: .06em; color: var(--faint); }
-tr.grp th.fell span, tr.grp th.fc span { display: block; position: relative; height: 15px; margin: 0 6px; border-bottom: 1px solid rgba(255,255,255,.35); }
-tr.grp th span i { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-style: normal; white-space: nowrap; }
-tr.grp th.fc { color: var(--storm); } tr.grp th.fc span { border-bottom-color: var(--storm); }
+tr.grp th.fell > span, tr.grp th.fc > span { display: block; position: relative; height: 15px; margin: 0 6px; border-bottom: 1px solid rgba(255,255,255,.35); }
+tr.grp th > span > i { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-style: normal; white-space: nowrap; }
+tr.grp th.fc { color: var(--storm); } tr.grp th.fc > span { border-bottom-color: var(--storm); }
 th.num, td.num { width: 72px; min-width: 72px; max-width: 72px; text-align: center; padding-left: 4px; padding-right: 4px; }
 .only-sm { display: none; }
 .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; color: #0b1322; }
 .chip.pow { background: var(--pow); } .chip.groom { background: var(--groom); } .chip.storm { background: var(--storm); }
 .legend { font-size: 12px; color: var(--dim); text-align: center; }
+
+/* email signup */
+.signup[hidden] { display: none; }
+.signup { text-align: center; justify-items: center; gap: 14px; padding: 24px 18px; }
+.signup h2 { color: #ffe9a3; }
+.signup form { display: flex; gap: 8px; width: 100%; max-width: 460px; }
+.signup input[type="email"] { flex: 1; min-width: 0; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.4); background: var(--glass-2); color: var(--fg); font: 500 16px var(--font); }
+.signup input[type="email"]::placeholder { color: var(--dim); }
+.signup button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: #fff; color: #3b2d8f; font: 700 15px var(--font); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,.15); transition: transform .15s; }
+.signup button:hover:not(:disabled) { transform: translateY(-1px); }
+.signup button:disabled { opacity: .6; cursor: default; }
+.signup form[hidden] { display: none; }
+.signup .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.signup .msg { font-size: 14px; color: var(--dim); min-height: 21px; }
+.signup .msg.ok { color: var(--yes); font-weight: 600; }
+.signup .msg.err { color: #fecaca; }
+@media (max-width: 560px) { .signup form { flex-direction: column; } }
 
 details { width: 100%; max-width: 560px; }
 summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px); transition: background .2s; }
@@ -110,10 +152,12 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
   table { font-size: 13px; } th, td { padding: 8px 5px; }
   .hide-sm, .chip { display: none; } .only-sm { display: inline; }
   th { letter-spacing: .04em; font-size: 10px; } th, td { padding: 8px 4px; } td:first-child { padding-left: 2px; }
-  th.num, td.num { width: 42px; min-width: 42px; max-width: 42px; } tr.grp th { padding: 0 2px 2px; font-size: 9px; letter-spacing: .03em; } tr.grp th.fell span, tr.grp th.fc span { margin: 0 2px; }
+  th.num, td.num { width: 42px; min-width: 42px; max-width: 42px; } tr.grp th { padding: 0 2px 2px; font-size: 9px; letter-spacing: .03em; } tr.grp th.fell > span, tr.grp th.fc > span { margin: 0 2px; }
   .legend { font-size: 11px; }
   td .st + small { display: none; }
-  .stat b { font-size: 24px; } .stats { gap: 10px 22px; }
+  .seg button { padding: 0 14px; } .regsel select { font-size: 14px; padding-left: 16px; }
+  .verdict { min-height: 4.5em; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; } .stat { min-width: 0; } .stat b { font-size: 24px; } .stat span { font-size: 10px; letter-spacing: .06em; } .stat em { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .word.yes, .word.maybe, .word.no, .word.sky, .word.storm { animation: pulse 2.4s ease-in-out infinite; }
@@ -125,8 +169,9 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
 
 <main>
   <header style="display:grid;gap:10px;justify-items:center">
-    <p class="eyebrow">Ikon Pass · Western US · <span id="today-label">today</span></p>
+    <p class="eyebrow">Ikon Pass · <span id="scope-label">All U.S.</span> · <span id="today-label">today</span></p>
     <h1>Who is today's pow king?</h1>
+    <div class="hero" id="hero">
     <svg class="crown" id="crown" hidden viewBox="0 0 120 84" aria-hidden="true">
       <defs><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".55" stop-color="#f5c542"/><stop offset="1" stop-color="#d9960f"/></linearGradient></defs>
       <path fill="url(#gold)" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/>
@@ -135,11 +180,19 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       <circle fill="#7dd3fc" cx="36" cy="60" r="4.5"/><circle fill="#f87171" cx="60" cy="58" r="5.5"/><circle fill="#7dd3fc" cx="84" cy="60" r="4.5"/>
     </svg>
     <p class="word loading" id="word"></p>
+    </div>
     <p class="verdict" id="verdict">Checking the mountains…</p>
     <div class="stats">
       <div class="stat"><b id="s-open">–</b><span>Resorts open</span><em id="s-open-note">&nbsp;</em></div>
       <div class="stat"><b id="s-pow">–</b><span>Deepest 24h</span><em id="s-pow-note">&nbsp;</em></div>
       <div class="stat"><b id="s-storm">–</b><span>Biggest 5-day</span><em id="s-storm-note">&nbsp;</em></div>
+    </div>
+    <div class="scope">
+      <div class="seg" role="group" aria-label="Which resorts to show">
+        <button type="button" id="seg-all" aria-pressed="true">All U.S.</button>
+        <button type="button" id="seg-region" aria-pressed="false">By region</button>
+      </div>
+      <div class="regwrap" id="regwrap"><div><label class="regsel" id="regsel"><span class="sr">Region</span><select id="region"></select><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></label></div></div>
     </div>
     <p class="status"><span class="dot" id="dot"></span><span id="status">Loading snow data</span></p>
   </header>
@@ -159,22 +212,33 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
     </section>
   </div>
 
+  <section class="glass signup" id="signup" hidden>
+    <div class="sec-head"><h2><svg viewBox="0 0 120 84" aria-hidden="true"><path fill="currentColor" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/><rect fill="currentColor" x="10" y="70" width="100" height="10" rx="3"/></svg> Get the royal decree</h2><p>Powder alerts are coming. Get on the list and be first to know when it dumps.</p></div>
+    <form id="signup-form" method="post" target="_blank" novalidate>
+      <label class="sr" for="signup-email">Email address</label>
+      <input type="email" id="signup-email" name="email_address" placeholder="you@email.com" autocomplete="email" inputmode="email" required>
+      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" id="signup-btn">Count me in</button>
+    </form>
+    <p class="msg" id="signup-msg" role="status">No spam. Unsubscribe any time.</p>
+  </section>
+
   <section class="glass">
-    <div class="sec-head"><h2>Everyone else</h2><p>Every Western US Ikon mountain. Open ones first, then by what's coming.</p></div>
+    <div class="sec-head"><h2 id="table-title">Everyone else</h2><p id="table-sub">Every U.S. Ikon mountain. Open ones first, then by what's coming.</p></div>
     <table>
       <thead>
-        <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i>Forecast</i></span></th><th class="hide-md"></th></tr>
+        <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i><span class="hide-sm">Forecast</span><span class="only-sm">Fcst</span></i></span></th><th class="hide-md"></th></tr>
         <tr><th>Resort</th><th style="text-align:left">Status</th><th class="num">24h</th><th class="num">72h</th><th class="num">5&nbsp;day</th><th class="hide-md">Right now</th></tr>
       </thead>
       <tbody id="table-body"></tbody>
     </table>
-    <p class="legend">Inches of snow. For open resorts, "Recent" is the resort's own reported snowfall (green dot). For closed ones it's the weather model, counting only the part of today that's happened. "Forecast" is the model's next five days.</p>
+    <p class="legend">Inches of snow. "Recent" is the weather model, counting only the part of today that's happened; at open resorts we also check the resort's own morning report and show whichever is larger. <span class="key"></span>means the resort's own number is the one shown. "Forecast" is the model's next five days.</p>
   </section>
 
   <details>
     <summary>FAQ</summary>
     <div class="faq">
-      <div><h3>Where does the snow number come from?</h3><p>For open resorts, the recent snowfall is the resort's own morning report (via OnTheSnow), the same number on the sign at the base. For closed resorts, and for every forecast, it's a weather model (Open-Meteo) sampled near the upper mountain. Models are honest but conservative; resort reports usually read a bit higher.</p></div>
+      <div><h3>Where does the snow number come from?</h3><p>For open resorts, we look at two numbers side by side: the resort's own morning report (via OnTheSnow), the same number on the sign at the base, and a weather model (Open-Meteo) sampled near the upper mountain. We show whichever is larger, and we stop trusting a resort report once it's about 20 hours old, so a 7am "0 new" can't hide a storm that's been dumping all day. Closed resorts, and every forecast, use the model alone.</p></div>
       <div><h3>How do you know what's open?</h3><p>Each morning we check SkiCentral's list of open ski areas. If a mountain isn't on it, we show its projected opening date from Ikon's own calendar. Closed mountains never make the Fresh tracks or Groomer lists, but they do show up in the storm forecast so you can plan.</p></div>
       <div><h3>How do you decide it's a groomer day?</h3><p>Under an inch of new snow in the last 24 hours, wind under about 20 mph, sunny or partly sunny, and a high above the low teens. Basically: sunglasses weather.</p></div>
       <div><h3>Where do the resort links go?</h3><p>Tap any mountain's name to open its official snow report, the one the resort publishes each morning. Good for base depth, lift status and the number the lifties will quote you.</p></div>
@@ -215,12 +279,49 @@ const LINKS = {
   "Taos Ski Valley": "https://www.skitaos.com/the-mountain/mountain-report",
   "Sierra-at-Tahoe": "https://sierraattahoe.com/weather-snow-report/",
   "Summit at Snoqualmie": "https://www.summitatsnoqualmie.com/mountain-report",
-  "Alyeska": "https://www.alyeskaresort.com/mountain-report-winter/"
+  "Alyeska": "https://www.alyeskaresort.com/mountain-report-winter/",
+  "Snow Valley": "https://snowvalleyca.com/",
+  "Boyne Mountain": "https://www.boynemountain.com/mountain-report",
+  "The Highlands": "https://www.highlandsharborsprings.com/mountain-report",
+  "Snowriver": "https://www.snowriver.com/",
+  "Lutsen": "https://www.lutsen.com/",
+  "Granite Peak": "https://www.skigranitepeak.com/",
+  "Killington": "https://killington.com/mountain-report",
+  "Stratton": "https://www.stratton.com/the-mountain/mountain-report",
+  "Sugarbush": "https://www.sugarbush.com/mountain/conditions",
+  "Loon": "https://www.loonmtn.com/mountain-report",
+  "Sunday River": "https://www.sundayriver.com/mountain-report",
+  "Sugarloaf": "https://www.sugarloaf.com/mountain-report",
+  "Blue Mountain": "https://www.skibluemt.com/",
+  "Camelback": "https://www.camelbackresort.com/",
+  "Snowshoe": "https://www.snowshoemtn.com/mountain-report"
 };
-const link = a => LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target="_blank" rel="noopener">${a.name}</a>` : a.name;
+// Short names for the cards and for phone-width tables, so no resort ever wraps onto two lines.
+const SHORT = { "Mammoth Mountain": "Mammoth", "Summit at Snoqualmie": "Snoqualmie", "Big Bear Mountain": "Big Bear", "Crystal Mountain": "Crystal", "Taos Ski Valley": "Taos", "Aspen Snowmass": "Aspen", "Copper Mountain": "Copper", "Arapahoe Basin": "A-Basin", "Palisades Tahoe": "Palisades", "Sierra-at-Tahoe": "Sierra", "Mt. Bachelor": "Bachelor", "June Mountain": "June", "Boyne Mountain": "Boyne", "The Highlands": "Highlands", "Blue Mountain": "Blue Mtn" };
+const shortOf = a => SHORT[a.name] || a.name;
+// mode: "full" (desktop table), "short" (cards), "auto" (full on desktop, short on phones)
+const link = (a, mode = "full") => {
+  const label = mode === "short" ? shortOf(a) : mode === "auto" ? `<span class="hide-sm">${a.name}</span><span class="only-sm">${shortOf(a)}</span>` : a.name;
+  return LINKS[a.name] ? `<a class="rl" href="${LINKS[a.name]}" target="_blank" rel="noopener" title="${a.name} snow report">${label}</a>` : label;
+};
+
+// Regions. A resort's region comes from its state, so the fetch script never needs to know about them.
+const REGIONS = [
+  { id: "west", name: "West", states: ["CA", "OR", "WA", "AK"], sub: "CA · OR · WA · AK" },
+  { id: "rockies", name: "Rockies", states: ["CO", "UT", "WY", "MT", "ID", "NM"], sub: "CO · UT · WY · MT · ID · NM" },
+  { id: "midwest", name: "Midwest", states: ["MI", "MN", "WI"], sub: "MI · MN · WI" },
+  { id: "east", name: "East", states: ["VT", "NH", "ME", "NY", "PA", "WV"], sub: "VT · NH · ME · PA · WV" }
+];
+const regionOf = r => REGIONS.find(g => g.states.includes(r.state)) || REGIONS[0];
+// Scope = All U.S. or one region. Remembered per browser; falls back quietly where storage is blocked.
+const scope = { mode: "all", region: "west" };
+try { const s = JSON.parse(localStorage.getItem("powking.scope") || "null"); if (s && REGIONS.some(g => g.id === s.region)) Object.assign(scope, { mode: s.mode === "region" ? "region" : "all", region: s.region }); } catch (e) {}
+const saveScope = () => { try { localStorage.setItem("powking.scope", JSON.stringify(scope)); } catch (e) {} };
+let lastData = null, lastLive = false;
 
 const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
 const PAST = 3; // days of history in the data; index PAST is today
+const REPORT_MAX_AGE_H = 20; // resort reports older than this are treated as stale and the model takes over
 
 const $ = id => document.getElementById(id);
 const r1 = n => Math.round(n * 10) / 10;
@@ -241,10 +342,22 @@ function analyze(r) {
   const frac = dayFraction();
   const isOpenNow = r.status === "open" || (r.status !== "closed" && !!r.opens && r.days[t] >= r.opens);
   const rep = r.report || {};
-  // Open resorts: use the resort's own reported snowfall when it has one. Everyone else: the weather model, today pro-rated.
-  const reported = isOpenNow && rep.last24 != null;
-  const last24 = reported ? rep.last24 : sum(r.snow.slice(t - 1, t)) + r.snow[t] * frac;
-  const last72 = reported && rep.last72 != null ? rep.last72 : sum(r.snow.slice(t - 2, t)) + r.snow[t] * frac;
+  // Weather model, with today pro-rated to the part of the day that has happened.
+  const model24 = sum(r.snow.slice(t - 1, t)) + r.snow[t] * frac;
+  const model72 = sum(r.snow.slice(t - 2, t)) + r.snow[t] * frac;
+  // Open resorts: the resort's own morning report, used alongside the model. A report is only trusted while it's fresh
+  // (under REPORT_MAX_AGE_H old); a stale one is yesterday's sign at the base. We then show the larger of the two, so a
+  // 7am "0 new" never hides a storm that's been dumping since, and a resort stake that reads higher than the model wins.
+  const repAgeH = rep.updated ? (Date.now() - new Date(rep.updated).getTime()) / 36e5 : Infinity;
+  const fresh = isOpenNow && rep.last24 != null && repAgeH <= REPORT_MAX_AGE_H;
+  const last24 = fresh ? Math.max(rep.last24, model24) : model24;
+  // 72h: a report up to two days old still covers most of the window, so add the model's snow since it was posted and
+  // compare that with the model's own 3-day sum. Models tend to miss the lighter days, so the larger number wins.
+  const repDay = rep.updated ? new Date(rep.updated).toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }) : null;
+  const sinceRep = repDay ? r.days.reduce((s, d, i) => s + (i <= t && d > repDay ? (i === t ? r.snow[i] * frac : r.snow[i]) : 0), 0) : 0;
+  const rep72 = isOpenNow && rep.last72 != null && repAgeH <= 48 ? rep.last72 + sinceRep : null;
+  const last72 = Math.max(model72, rep72 ?? 0, fresh ? last24 : 0);
+  const reported = fresh && rep.last24 >= model24;   // green dot: the resort's number is the one shown
   const next5 = sum(r.snow.slice(t + 1, t + 6));
   const next5Peak = Math.max(...r.snow.slice(t + 1, t + 6));
   const peakIdx = r.snow.slice(t + 1, t + 6).indexOf(next5Peak);
@@ -264,13 +377,26 @@ function dayName(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocale
 function longDay(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "long" }); }
 
 function rowHtml(kind, a, big, unit, why) {
-  return `<div class="row"><div class="name">${link(a)}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
+  return `<div class="row"><div class="name">${link(a, "short")}<small>${a.state}</small></div><div class="big">${big}<small>${unit}</small></div><div class="why">${why}</div></div>`;
 }
 
 function render(data, live) {
-  const all = data.resorts.map(analyze);
-  const today = all[0].days[PAST];
+  lastData = data; lastLive = live;
+  const everything = data.resorts.map(analyze);
+  const region = REGIONS.find(g => g.id === scope.region) || REGIONS[0];
+  const all = scope.mode === "region" ? everything.filter(a => regionOf(a).id === region.id) : everything;
+  const today = everything[0].days[PAST];
   $("today-label").textContent = new Date(today + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+  // scope control
+  $("scope-label").textContent = scope.mode === "region" ? region.name : "All U.S.";
+  $("seg-all").setAttribute("aria-pressed", scope.mode === "all"); $("seg-region").setAttribute("aria-pressed", scope.mode === "region");
+  const sel = $("region");
+  const opts = REGIONS.map(g => { const n = everything.filter(a => regionOf(a).id === g.id); return `<option value="${g.id}">${g.name} · ${n.length} resorts, ${n.filter(a => a.isOpen).length} open</option>`; }).join("");
+  if (sel.dataset.opts !== opts) { sel.innerHTML = opts; sel.dataset.opts = opts; }   // only rebuild the menu when its text changes
+  sel.value = region.id;
+  $("regwrap").classList.toggle("on", scope.mode === "region");
+  $("table-title").textContent = scope.mode === "region" ? "Everyone else · " + region.name : "Everyone else";
+  $("table-sub").textContent = scope.mode === "region" ? `All ${all.length} ${region.name} Ikon mountains (${region.sub}). Open ones first, then by what's coming.` : `Every U.S. Ikon mountain, by region. Open ones first, then by what's coming.`;
 
   // Fresh tracks
   const open = all.filter(a => a.isOpen);
@@ -280,7 +406,7 @@ function render(data, live) {
   $("list-pow").innerHTML = (pow.length
     ? pow.map(a => rowHtml("pow", a, fmtIn(a.last24), "in / 24h", `${fmtIn(a.last72)}" over 3 days · ${sky(a.code)}, ${Math.round(a.tmax)}°, wind ${Math.round(a.wind)} mph`)).join("")
     : `<p class="empty">No open resort got 3"+ in the last 24 hours. ${dusting.length ? "A dusting at " + dusting.map(a => a.name).join(", ") + "." : "Dry at the open hills."}</p>`)
-    + (closedPow.length ? `<p class="empty">Snowing on closed lifts: ${closedPow.map(a => `${a.name} ${fmtIn(a.last24)}" (${opensText(a)})`).join(", ")}.</p>` : "");
+    + (closedPow.length ? `<p class="empty">Snowing on closed lifts: ${closedPow.slice(0, 4).map(a => `${shortOf(a)} ${fmtIn(a.last24)}" (${opensText(a).replace("Opens ", "")})`).join(", ")}${closedPow.length > 4 ? ` and ${closedPow.length - 4} more` : ""}.</p>` : "");
 
   // Groomer day
   const groom = all.filter(a => a.groomerOk).sort((a, b) => b.groomScore - a.groomScore).slice(0, 5);
@@ -295,12 +421,15 @@ function render(data, live) {
     : `<p class="empty">Nothing meaningful in the five-day forecast. High pressure, sorry.</p>`;
 
   // Everyone else
-  const tb = all.slice().sort((a, b) => (b.isOpen - a.isOpen) || ((b.next5 + b.last24) - (a.next5 + a.last24)));
-  $("table-body").innerHTML = tb.map(a => {
+  const bySnow = (a, b) => (b.isOpen - a.isOpen) || ((b.next5 + b.last24) - (a.next5 + a.last24));
+  const rowFor = a => {
     const chip = a.last24 >= 3 ? `<span class="chip pow">POW</span>` : a.groomerOk ? `<span class="chip groom">GROOM</span>` : a.next5 >= 6 ? `<span class="chip storm">STORM</span>` : "";
     const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/, \d+" past.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
-    return `<tr><td>${link(a)}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
-  }).join("");
+    return `<tr><td>${link(a, "auto")}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
+  };
+  $("table-body").innerHTML = scope.mode === "region"
+    ? all.slice().sort(bySnow).map(rowFor).join("")
+    : REGIONS.map(g => { const rows = all.filter(a => regionOf(a).id === g.id).sort(bySnow); return rows.length ? `<tr class="rg"><th colspan="6">${g.name}<span>· ${rows.length} resorts · ${rows.filter(a => a.isOpen).length} open</span></th></tr>` + rows.map(rowFor).join("") : ""; }).join("");
 
   // Verdict
   const best = pow[0], bigStorm = storm[0];
@@ -316,13 +445,13 @@ function render(data, live) {
   // Colour rule: a resort name is blue (and wears the crown); NOBODY is red.
   const named = !word.startsWith("THOU HAST");
   if (named) $("crown").removeAttribute("hidden"); else $("crown").setAttribute("hidden", "");
-  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); $("word").style.fontSize = `min(140px, ${(118 / Math.max(...word.split("\n").map(l => l.length))).toFixed(1)}vw)`;
+  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); fitWord();
   $("verdict").innerHTML = v;
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
   const biggest = all.filter(a => !a.noWx).sort((a, b) => b.next5 - a.next5)[0];
   $("s-open").innerHTML = `${open.length}<small>/ ${all.length}</small>`;
-  $("s-open-note").textContent = open.length ? open.slice(0, 2).map(a => a.name.replace(" Mountain", "")).join(", ") + (open.length > 2 ? " +" + (open.length - 2) : "") : "Lifts closed";
+  $("s-open-note").textContent = open.length ? shortOf(open[0]) + (open.length > 1 ? " +" + (open.length - 1) + " more" : "") : "Lifts closed";
   $("s-pow").innerHTML = deepest && deepest.last24 >= 0.05 ? `${fmtIn(deepest.last24)}<small>in</small>` : `0<small>in</small>`;
   $("s-pow-note").textContent = deepest && deepest.last24 >= 0.05 ? deepest.name : "Dry at open resorts";
   $("s-storm").innerHTML = biggest && biggest.next5 >= 0.05 ? `${fmtIn(biggest.next5)}<small>in</small>` : `0<small>in</small>`;
@@ -356,7 +485,55 @@ async function fetchLive(resorts) {
   };
 }
 
+// Size the big name to the space it has. The crown + name box is one fixed height per screen width, so the header
+// (and the toggle under it) stays put whether the king is ALTA, MAMMOTH or nobody; long names shrink to fit the width.
+function fitWord() {
+  const el = $("word"), hero = $("hero"), vw = document.documentElement.clientWidth;
+  const crownH = Math.min(92, Math.max(56, vw * 0.09)), oneLine = Math.min(140, vw * 0.24), boxH = Math.round(crownH + oneLine + 8);
+  hero.style.height = boxH + "px";
+  const lines = el.textContent.split("\n").length;
+  let size = lines > 1 ? Math.min(118, (boxH - 28) / lines) : oneLine;
+  el.style.fontSize = size + "px";
+  const room = Math.min(860, vw - 32) * 0.94;         // column width, less a little room for the pulse animation
+  if (el.offsetWidth > room) el.style.fontSize = (size * room / el.offsetWidth).toFixed(1) + "px";
+}
+let fitQueued = false;
+addEventListener("resize", () => { if (fitQueued) return; fitQueued = true; requestAnimationFrame(() => { fitQueued = false; if (lastData) fitWord(); }); });
+
 const reveal = () => document.querySelector("main").classList.add("ready");
+
+const rerender = () => { saveScope(); if (lastData) render(lastData, lastLive); };
+$("seg-all").addEventListener("click", () => { scope.mode = "all"; rerender(); });
+$("seg-region").addEventListener("click", () => { scope.mode = "region"; rerender(); });
+$("region").addEventListener("change", e => { scope.region = e.target.value; scope.mode = "region"; rerender(); });
+
+// ---- Email signup ----
+// Paste the form's "action" URL from Kit between the quotes, e.g. "https://app.kit.com/forms/1234567/subscriptions".
+// While this is empty the signup box stays hidden, so the page is safe to publish either way.
+const SIGNUP_URL = "";
+if (/^https:\/\//.test(SIGNUP_URL)) {
+  const form = $("signup-form"), msg = $("signup-msg"), btn = $("signup-btn"), input = $("signup-email");
+  form.action = SIGNUP_URL;
+  $("signup").removeAttribute("hidden");
+  const say = (text, cls) => { msg.textContent = text; msg.className = "msg" + (cls ? " " + cls : ""); };
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = input.value.trim();
+    if (form.website.value) return;                                  // bots fill the hidden field; people can't see it
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("That email doesn't look right. Try again?", "err"); input.focus(); return; }
+    btn.disabled = true; say("Adding you…");
+    const body = new FormData(); body.append("email_address", email);
+    try {
+      try { await fetch(SIGNUP_URL, { method: "POST", body, headers: { Accept: "application/json" } }); }
+      catch (err) { await fetch(SIGNUP_URL, { method: "POST", body, mode: "no-cors" }); }   // still delivers if the reply is blocked
+      form.hidden = true;
+      say("You're on the list. Check your inbox to confirm.", "ok");
+    } catch (err) {
+      btn.disabled = false;
+      say("Couldn't reach the list just now. Try again in a minute.", "err");
+    }
+  });
+}
 
 (async () => {
   // Render once: wait briefly for live weather, otherwise fall back to the baked-in snapshot.

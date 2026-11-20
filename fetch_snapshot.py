@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch Open-Meteo snow data for Western US Ikon resorts and write snapshot.json.
+"""Fetch Open-Meteo snow data for every U.S. Ikon resort and write snapshot.json.
 Usage: python3 -I fetch_snapshot.py [out.json]
 """
 import json, re, sys, time, urllib.request, urllib.parse, datetime
@@ -32,6 +32,23 @@ RESORTS = [
     ("Mt. Bachelor", "OR", 43.979, -121.688, 2200, "mt.bachelor", "2026-12-04", "oregon/mt-bachelor"),
     ("Taos Ski Valley", "NM", 36.596, -105.454, 3000, "taos", "2026-11-26", "new-mexico/taos-ski-valley"),
     ("Alyeska", "AK", 60.961, -149.098, 1000, "alyeska", "2026-11-28", "alaska/alyeska-resort"),
+    ("Snow Valley", "CA", 34.224, -117.036, 2300, "snowvalley", "2026-11-27", "california/snow-valley"),
+    # Midwest
+    ("Boyne Mountain", "MI", 45.163, -84.93, 390, "boyne", "2026-12-04", "michigan/boyne-mountain-resort"),
+    ("The Highlands", "MI", 45.47, -84.93, 400, "boynehighlands", "2026-12-11", "michigan/boyne-highlands"),
+    ("Snowriver", "MI", 46.496, -89.963, 500, "bigpowderhorn|blackjack", "2026-11-27", "michigan/snowriver-mountain-resort"),
+    ("Lutsen", "MN", 47.664, -90.718, 500, "lutsen", "2026-11-26", "minnesota/lutsen-mountains"),
+    ("Granite Peak", "WI", 44.93, -89.683, 450, "granitepeak", "2026-11-25", "wisconsin/granite-peak-ski-area"),
+    # East
+    ("Killington", "VT", 43.604, -72.82, 1290, "killington|pico", "2026-11-17", "vermont/killington-resort"),
+    ("Stratton", "VT", 43.113, -72.908, 1180, "stratton", "2026-11-25", "vermont/stratton-mountain"),
+    ("Sugarbush", "VT", 44.136, -72.894, 1240, "sugarbush", "2026-11-27", "vermont/sugarbush"),
+    ("Loon", "NH", 44.036, -71.621, 900, "loon", "2026-11-27", "new-hampshire/loon-mountain"),
+    ("Sunday River", "ME", 44.473, -70.857, 950, "sundayriver", "2026-11-27", "maine/sunday-river"),
+    ("Sugarloaf", "ME", 45.031, -70.313, 1290, "sugarloaf", "2026-11-27", "maine/sugarloaf"),
+    ("Blue Mountain", "PA", 40.825, -75.519, 470, "bluemountainskiarea", "2026-12-10", "pennsylvania/blue-mountain-ski-area"),
+    ("Camelback", "PA", 41.051, -75.355, 630, "camelback", "2026-12-11", "pennsylvania/camelback-mountain-resort"),
+    ("Snowshoe", "WV", 38.411, -79.994, 1480, "snowshoe", "2026-11-25", "west-virginia/snowshoe-mountain-resort"),
 ]
 
 DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max"

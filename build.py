@@ -7,7 +7,7 @@ snap = json.dumps(json.load(open(here / "snapshot.json")), separators=(",", ":")
 body = page.replace("/*__SNAPSHOT__*/null", snap, 1)
 (here / "artifact.html").write_text(body)
 
-DESC = "Fresh snow, groomer days and storms across every Western Ikon resort. Updated daily."
+DESC = "Fresh snow, groomer days and storms across every U.S. Ikon resort. Updated daily."
 CROWN_ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 84'%3E"
               "%3Cpath fill='%23f5c542' d='M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z'/%3E"
               "%3Crect fill='%23f5c542' x='10' y='70' width='100' height='10' rx='3'/%3E%3C/svg%3E")
