@@ -122,18 +122,21 @@ th.num, td.num { width: 72px; min-width: 72px; max-width: 72px; text-align: cent
 .signup[hidden] { display: none; }
 .signup { text-align: center; justify-items: center; gap: 14px; padding: 24px 18px; }
 .signup h2 { color: #ffe9a3; }
-.signup form { display: flex; gap: 8px; width: 100%; max-width: 460px; }
-.signup input[type="email"] { flex: 1; min-width: 0; min-height: 48px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.4); background: var(--glass-2); color: var(--fg); font: 500 16px var(--font); }
-.signup input[type="email"]::placeholder { color: var(--dim); }
-.signup button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: #fff; color: #3b2d8f; font: 700 15px var(--font); cursor: pointer; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,.15); transition: transform .15s; }
-.signup button:hover:not(:disabled) { transform: translateY(-1px); }
-.signup button:disabled { opacity: .6; cursor: default; }
-.signup form[hidden] { display: none; }
-.signup .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.signup a.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: #fff; color: #3b2d8f; font: 700 15px var(--font); text-decoration: none; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,.15); transition: transform .15s; }
+.signup a.btn:hover, .signup a.btn:focus-visible { transform: translateY(-1px); }
+.share-btn { min-height: 44px; padding: 0 20px; border: 1px solid var(--edge); border-radius: 999px; background: var(--glass); color: var(--fg); font: 600 14px var(--font); cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background .15s; }
+.share-btn:hover, .share-btn:focus-visible { background: var(--glass-2); }
+.tsearch { width: 100%; max-width: 420px; margin: 0 auto; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.4); background: var(--glass-2); color: var(--fg); font: 500 15px var(--font); }
+.tsearch::placeholder { color: var(--dim); }
+.glass.is-empty { padding: 14px 18px; gap: 6px; }
+.glass.is-empty .sec-head p { display: none; }
+.exp { display: none; }
+tr.detail-row { display: none; }
+tr.detail-row td { text-align: left; font-size: 13px; color: var(--dim); padding-top: 2px; }
+@media (max-width: 760px) { .exp { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; border: 1px solid var(--edge); border-radius: 50%; background: var(--glass); color: var(--fg); font-size: 16px; cursor: pointer; vertical-align: middle; } tr.detail-row.open { display: table-row; } }
 .signup .msg { font-size: 14px; color: var(--dim); min-height: 21px; }
 .signup .msg.ok { color: var(--yes); font-weight: 600; }
 .signup .msg.err { color: #fecaca; }
-@media (max-width: 560px) { .signup form { flex-direction: column; } }
 
 details { width: 100%; max-width: 560px; }
 summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin: 0 auto; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 10px 22px; font-weight: 600; font-size: 14px; backdrop-filter: blur(10px); transition: background .2s; }
@@ -197,6 +200,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       <div class="regwrap" id="regwrap"><div><label class="regsel" id="regsel"><span class="sr">Region</span><select id="region"></select><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></label></div></div>
     </div>
     <p class="status"><span class="dot" id="dot"></span><span id="status">Loading snow data</span></p>
+    <button type="button" class="share-btn" id="share-btn">Text the group chat</button>
   </header>
 
   <div class="three">
@@ -214,19 +218,15 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
     </section>
   </div>
 
-  <section class="glass signup" id="signup" hidden>
-    <div class="sec-head"><h2><svg viewBox="0 0 120 84" aria-hidden="true"><path fill="currentColor" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/><rect fill="currentColor" x="10" y="70" width="100" height="10" rx="3"/></svg> Get the royal decree</h2><p>Powder alerts are coming. Get on the list and be first to know when it dumps.</p></div>
-    <form id="signup-form" method="post" target="_blank" novalidate>
-      <label class="sr" for="signup-email">Email address</label>
-      <input type="email" id="signup-email" name="email_address" placeholder="you@email.com" autocomplete="email" inputmode="email" required>
-      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button type="submit" id="signup-btn">Count me in</button>
-    </form>
-    <p class="msg" id="signup-msg" role="status">No spam. Unsubscribe any time.</p>
+  <section class="glass signup" id="signup">
+    <div class="sec-head"><h2><svg viewBox="0 0 120 84" aria-hidden="true"><path fill="currentColor" d="M10 70 L4 24 L34 46 L60 10 L86 46 L116 24 L110 70 Z"/><rect fill="currentColor" x="10" y="70" width="100" height="10" rx="3"/></svg> Get the royal decree</h2><p>Powder alerts by email, only when it's actually good. Get on the list and be first to know when it dumps.</p></div>
+    <a class="btn" href="https://jordans-newsletter-b69734.beehiiv.com/" target="_blank" rel="noopener">Count me in</a>
+    <p class="msg">No spam. Confirm your email to join, unsubscribe any time.</p>
   </section>
 
   <section class="glass">
     <div class="sec-head"><h2 id="table-title">Everyone else</h2><p id="table-sub">Every U.S. Ikon mountain. Open ones first, then by what's coming.</p></div>
+    <label class="sr" for="table-search">Search resorts</label><input type="search" class="tsearch" id="table-search" placeholder="Search resorts…" autocomplete="off">
     <table>
       <thead>
         <tr class="grp"><th></th><th></th><th colspan="2" class="fell"><span><i>Recent</i></span></th><th class="fc"><span><i><span class="hide-sm">Forecast</span><span class="only-sm">Fcst</span></i></span></th><th class="hide-md"></th></tr>
@@ -244,7 +244,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       <div><h3>How do you know what's open?</h3><p>Each morning we check SkiCentral's list of open ski areas. If a mountain isn't on it, we show its projected opening date from Ikon's own calendar. Closed mountains never make the Fresh tracks or Groomer lists, but they do show up in the storm forecast so you can plan.</p></div>
       <div><h3>How do you decide it's a groomer day?</h3><p>Under an inch of new snow in the last 24 hours, wind under about 20 mph, sunny or partly sunny, and a high above the low teens. Basically: sunglasses weather.</p></div>
       <div><h3>Where do the resort links go?</h3><p>Tap any mountain's name to open its official snow report, the one the resort publishes each morning. Good for base depth, lift status and the number the lifties will quote you.</p></div>
-      <div><h3>What's next?</h3><p>Blackout dates by pass tier, lift status, drive times from the Bay, and a "text the group chat" button. Keep checking.</p></div>
+      <div><h3>What's next?</h3><p>Blackout dates by pass tier, lift status, and drive times from the Bay. Keep checking.</p></div>
     </div>
   </details>
 
@@ -282,20 +282,20 @@ const LINKS = {
   "Sierra-at-Tahoe": "https://sierraattahoe.com/weather-snow-report/",
   "Summit at Snoqualmie": "https://www.summitatsnoqualmie.com/mountain-report",
   "Alyeska": "https://www.alyeskaresort.com/mountain-report-winter/",
-  "Snow Valley": "https://snowvalleyca.com/",
+  "Snow Valley": "https://www.bigbearmountainresort.com/mountain-information",
   "Boyne Mountain": "https://www.boynemountain.com/mountain-report",
   "The Highlands": "https://www.highlandsharborsprings.com/mountain-report",
-  "Snowriver": "https://www.snowriver.com/",
-  "Lutsen": "https://www.lutsen.com/",
-  "Granite Peak": "https://www.skigranitepeak.com/",
+  "Snowriver": "https://www.snowriver.com/mountain-info/mountain-report",
+  "Lutsen": "https://www.lutsen.com/mountain-info/mountain-report",
+  "Granite Peak": "https://www.skigranitepeak.com/mountain-info/mountain-report",
   "Killington": "https://killington.com/mountain-report",
   "Stratton": "https://www.stratton.com/the-mountain/mountain-report",
   "Sugarbush": "https://www.sugarbush.com/mountain/conditions",
   "Loon": "https://www.loonmtn.com/mountain-report",
   "Sunday River": "https://www.sundayriver.com/mountain-report",
   "Sugarloaf": "https://www.sugarloaf.com/mountain-report",
-  "Blue Mountain": "https://www.skibluemt.com/",
-  "Camelback": "https://www.camelbackresort.com/",
+  "Blue Mountain": "https://www.skibluemt.com/winter-sports/skiing-snowboarding/trail-map/",
+  "Camelback": "https://www.camelbackresort.com/snow-report-conditions",
   "Snowshoe": "https://www.snowshoemtn.com/mountain-report"
 };
 // Short names for the cards and for phone-width tables, so no resort ever wraps onto two lines.
@@ -319,7 +319,7 @@ const regionOf = r => REGIONS.find(g => g.states.includes(r.state)) || REGIONS[0
 const scope = { mode: "all", region: "west" };
 try { const s = JSON.parse(localStorage.getItem("powking.scope") || "null"); if (s && REGIONS.some(g => g.id === s.region)) Object.assign(scope, { mode: s.mode === "region" ? "region" : "all", region: s.region }); } catch (e) {}
 const saveScope = () => { try { localStorage.setItem("powking.scope", JSON.stringify(scope)); } catch (e) {} };
-let lastData = null, lastLive = false;
+let lastData = null, lastLive = false, shareText = "Check today's Ikon snow rankings on Pow King.";
 
 const DAILY = "snowfall_sum,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code,precipitation_probability_max";
 const PAST = 3; // days of history in the data; index PAST is today
@@ -427,11 +427,17 @@ function render(data, live) {
   const rowFor = a => {
     const chip = a.last24 >= 3 ? `<span class="chip pow">POW</span>` : a.groomerOk ? `<span class="chip groom">GROOM</span>` : a.next5 >= 6 ? `<span class="chip storm">STORM</span>` : "";
     const st = a.isOpen ? `<span class="st open">Open</span>${a.detail ? `<small>${a.detail.replace(/^OPEN - /, "").replace(/, \d+" past.*$/, "")}</small>` : ""}` : `<span class="st"><span class="hide-sm">${opensText(a)}</span><span class="only-sm">${opensText(a).replace("Opens ", "")}</span></span>`;
-    return `<tr><td>${link(a, "auto")}<small>${a.state}</small>${chip}</td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr>`;
+    const detailBits = [a.noWx ? null : `Right now: ${sky(a.code)}, ${Math.round(a.tmax)}° (low ${Math.round(a.tmin)}°), wind ${Math.round(a.wind)} mph`, a.detail ? a.detail.replace(/^OPEN - /, "").replace(/, \d+" past.*$/, "") : null, a.isOpen ? null : opensText(a)].filter(Boolean).join(" · ");
+    return `<tr class="resort-row" data-search="${(a.name + " " + a.state).toLowerCase()}"><td>${link(a, "auto")}<small>${a.state}</small>${chip}<button type="button" class="exp" aria-label="More about ${a.name}" aria-expanded="false">›</button></td><td class="stc">${st}</td><td class="num ${heat(a.last24)}${a.reported ? " rep" : ""}" title="${a.reported ? "Reported by the resort" : "Weather model"}">${a.noWx && !a.reported ? "–" : fmtIn(a.last24)}</td><td class="num ${heat(a.last72)}${a.reported ? " rep" : ""}">${a.noWx && !a.reported ? "–" : fmtIn(a.last72)}</td><td class="num ${heat(a.next5)}">${a.noWx ? "–" : fmtIn(a.next5)}</td><td class="hide-md">${a.noWx ? "–" : sky(a.code) + " " + Math.round(a.tmax) + "°"}</td></tr><tr class="detail-row"><td colspan="6">${detailBits || "No extra detail right now."}</td></tr>`;
   };
   $("table-body").innerHTML = scope.mode === "region"
     ? all.slice().sort(bySnow).map(rowFor).join("")
     : REGIONS.map(g => { const rows = all.filter(a => regionOf(a).id === g.id).sort(bySnow); return rows.length ? `<tr class="rg"><th colspan="6">${g.name}<span>· ${rows.length} resorts · ${rows.filter(a => a.isOpen).length} open</span></th></tr>` + rows.map(rowFor).join("") : ""; }).join("");
+  applySearch();
+  // Collapse the three pick cards when they have nothing to show, so empty sections don't take prime space.
+  document.querySelector(".glass.pow").classList.toggle("is-empty", !pow.length && !closedPow.length);
+  document.querySelector(".glass.groom").classList.toggle("is-empty", !groom.length);
+  document.querySelector(".glass.storm").classList.toggle("is-empty", !storm.length);
 
   // Verdict
   const best = pow[0], bigStorm = storm[0];
@@ -450,6 +456,7 @@ function render(data, live) {
   if (named && best && LINKS[best.name]) { $("word").innerHTML = `<a href="${LINKS[best.name]}" target="_blank" rel="noopener" title="${best.name} snow report">${word}</a>`; } else { $("word").textContent = word; }
   $("word").className = "word " + (named ? "sky" : "no"); fitWord();
   $("verdict").innerHTML = v;
+  shareText = best ? `👑 ${best.name} is today's Pow King — ${fmtIn(best.last24)}" in the last 24 hours among open resorts.` : bigStorm ? `No Pow King today, but ${bigStorm.name} could get ${fmtIn(bigStorm.next5)}" in the next five days.` : "No Pow King today — check today's Ikon snow rankings.";
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
   const biggest = all.filter(a => !a.noWx).sort((a, b) => b.next5 - a.next5)[0];
@@ -511,32 +518,48 @@ $("seg-region").addEventListener("click", () => { scope.mode = "region"; rerende
 $("region").addEventListener("change", e => { scope.region = e.target.value; scope.mode = "region"; rerender(); });
 
 // ---- Email signup ----
-// Paste the form's "action" URL from Kit between the quotes, e.g. "https://app.kit.com/forms/1234567/subscriptions".
-// While this is empty the signup box stays hidden, so the page is safe to publish either way.
-const SIGNUP_URL = "";
-if (/^https:\/\//.test(SIGNUP_URL)) {
-  const form = $("signup-form"), msg = $("signup-msg"), btn = $("signup-btn"), input = $("signup-email");
-  form.action = SIGNUP_URL;
-  $("signup").removeAttribute("hidden");
-  const say = (text, cls) => { msg.textContent = text; msg.className = "msg" + (cls ? " " + cls : ""); };
-  form.addEventListener("submit", async e => {
-    e.preventDefault();
-    const email = input.value.trim();
-    if (form.website.value) return;                                  // bots fill the hidden field; people can't see it
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("That email doesn't look right. Try again?", "err"); input.focus(); return; }
-    btn.disabled = true; say("Adding you…");
-    const body = new FormData(); body.append("email_address", email);
-    try {
-      try { await fetch(SIGNUP_URL, { method: "POST", body, headers: { Accept: "application/json" } }); }
-      catch (err) { await fetch(SIGNUP_URL, { method: "POST", body, mode: "no-cors" }); }   // still delivers if the reply is blocked
-      form.hidden = true;
-      say("You're on the list. Check your inbox to confirm.", "ok");
-    } catch (err) {
-      btn.disabled = false;
-      say("Couldn't reach the list just now. Try again in a minute.", "err");
-    }
+// The signup box links to the Pow King publication on Beehiiv, which handles the form,
+// the confirm-your-email step, and unsubscribes. Nothing to wire up here.
+
+// ---- Table search ----
+function applySearch() {
+  const q = ($("table-search").value || "").trim().toLowerCase();
+  let anyVisible = false;
+  document.querySelectorAll("#table-body tr.resort-row").forEach(tr => {
+    const show = !q || tr.dataset.search.includes(q);
+    tr.style.display = show ? "" : "none";
+    const det = tr.nextElementSibling;
+    if (det && det.classList.contains("detail-row")) { if (!show) { det.classList.remove("open"); det.style.display = "none"; } else det.style.display = ""; }
+    if (show) anyVisible = true;
   });
+  document.querySelectorAll("#table-body tr.rg").forEach(hdr => {
+    let el = hdr.nextElementSibling, vis = false;
+    while (el && !el.classList.contains("rg")) { if (el.classList.contains("resort-row") && el.style.display !== "none") vis = true; el = el.nextElementSibling; }
+    hdr.style.display = vis ? "" : "none";
+  });
+  let none = $("no-matches");
+  if (q && !anyVisible) {
+    if (!none) { none = document.createElement("tr"); none.id = "no-matches"; none.innerHTML = '<td colspan="6" style="text-align:center;color:var(--dim)">No resorts match that search.</td>'; $("table-body").appendChild(none); }
+    none.style.display = "";
+  } else if (none) none.style.display = "none";
 }
+$("table-search").addEventListener("input", applySearch);
+
+// ---- Mobile row details ----
+$("table-body").addEventListener("click", e => {
+  const btn = e.target.closest(".exp");
+  if (!btn) return;
+  const det = btn.closest("tr").nextElementSibling;
+  if (det && det.classList.contains("detail-row")) { const open = det.classList.toggle("open"); btn.setAttribute("aria-expanded", open); }
+});
+
+// ---- Share ----
+$("share-btn").addEventListener("click", async () => {
+  const url = "https://powking.io/";
+  if (navigator.share) { try { await navigator.share({ title: "Pow King", text: shareText, url }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) { location.href = "sms:?&body=" + encodeURIComponent(shareText + " " + url); return; }
+  try { await navigator.clipboard.writeText(shareText + " " + url); const b = $("share-btn"); b.textContent = "Copied — paste it in the group chat"; setTimeout(() => { b.textContent = "Text the group chat"; }, 2500); } catch (e) {}
+});
 
 (async () => {
   // Render the baked-in snapshot right away so the page is never blank, then refresh with live weather.
