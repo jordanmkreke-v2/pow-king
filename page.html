@@ -1,4 +1,4 @@
-<title>Pow King</title>
+<title>Pow King — Today's Best Ikon Snow</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: one centered column on a full-page gradient, Hawk Hill PR style. Thin uppercase question,
@@ -42,6 +42,8 @@ p { margin: 0; }
 .word.sky { color: var(--sky); text-shadow: 0 0 30px rgba(125,211,252,.55); }
 .word.storm { color: var(--storm); text-shadow: 0 0 30px rgba(196,181,253,.6); }
 .word.loading { color: var(--faint); }
+.word a { color: inherit; text-decoration: none; }
+.word a:hover, .word a:focus-visible { text-decoration: underline; text-underline-offset: .08em; }
 .verdict { font-size: clamp(17px, 2.4vw, 21px); max-width: 44ch; opacity: .92; text-wrap: balance; min-height: 3em; }
 .verdict strong { font-weight: 700; }
 .stats { display: flex; gap: 12px 40px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
@@ -232,7 +234,7 @@ footer { font-size: 12px; color: var(--faint); max-width: 60ch; }
       </thead>
       <tbody id="table-body"></tbody>
     </table>
-    <p class="legend">Inches of snow. "Recent" is the weather model, counting only the part of today that's happened; at open resorts we also check the resort's own morning report and show whichever is larger. <span class="key"></span>means the resort's own number is the one shown. "Forecast" is the model's next five days.</p>
+    <p class="legend">Inches of snow. "Recent" is the weather model, counting only the part of today that's happened; at open resorts we also check the resort's own morning report and show whichever is larger. <span class="key" aria-hidden="true"></span>A green dot means the resort's own number is the one shown. "Forecast" is the model's next five days.</p>
   </section>
 
   <details>
@@ -372,7 +374,7 @@ function analyze(r) {
 
 function shortName(a) { return a.name.replace(/ (Mountain|Ski Valley)$/, "").replace("Aspen Snowmass", "Aspen").replace("Palisades Tahoe", "Palisades").replace("Arapahoe Basin", "A-Basin").toUpperCase(); }
 function heat(n) { return n >= 8 ? "heat h3" : n >= 3 ? "heat h2" : n >= 1 ? "heat h1" : ""; }
-function opensText(a) { return a.isOpen ? "Open" : a.opens ? "Opens " + new Date(a.opens + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "Opening TBA"; }
+function opensText(a) { if (a.isOpen) return "Open"; if (!a.opens) return "Opening TBA"; const today = a.days && a.days[PAST]; return a.opens === today ? "Opens today" : "Opens " + new Date(a.opens + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
 function dayName(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "short" }); }
 function longDay(iso) { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString(undefined, { weekday: "long" }); }
 
@@ -436,8 +438,8 @@ function render(data, live) {
   let v, word, cls;
   const rivals = best ? pow.slice(1).filter(a => a.last24 >= best.last24 - 2 && a.last24 >= 6) : [];
   const rivalText = rivals.length ? ` ${rivals.map(a => a.name + " (" + fmtIn(a.last24) + '")').join(" and ")} ${rivals.length > 1 ? "are" : "is"} right there with it.` : "";
-  if (best && best.last24 >= 6) { word = shortName(best); cls = "yes"; v = `<strong>${fmtIn(best.last24)}" in the last 24 hours</strong> and it's ${sky(best.code).toLowerCase()} up there.${rivalText || " Go."}`; }
-  else if (best) { word = shortName(best); cls = "maybe"; v = `<strong>${fmtIn(best.last24)}" of new snow.</strong> Soft, not deep. Fun, not fall-line-face-shots fun.`; }
+  if (best && best.last24 >= 6) { word = shortName(best); cls = "yes"; v = `<strong>${fmtIn(best.last24)}" in the last 24 hours among open resorts</strong> and it's ${sky(best.code).toLowerCase()} up there.${rivalText || " Go."}`; }
+  else if (best) { word = shortName(best); cls = "maybe"; v = `<strong>${fmtIn(best.last24)}" of new snow among open resorts.</strong> Soft, not deep. Fun, not fall-line-face-shots fun.`; }
   else if (bigStorm && bigStorm.next5 >= 6) { word = "THOU HAST\nNO KING"; cls = "no"; v = `<strong>No fresh snow today,</strong> but ${bigStorm.name} is looking at ${fmtIn(bigStorm.next5)}" by ${longDay(bigStorm.peakDay)}${bigStorm.isOpen ? "" : " (" + opensText(bigStorm).replace("Opens", "opens") + ")"}. ${groom[0] ? "Meanwhile it's a groomer day at " + groom[0].name + "." : "The realm waits."}`; }
   else if (groom[0]) { word = "THOU HAST\nNO KING"; cls = "sky"; v = `<strong>No fresh snow, but it's bluebird at ${groom[0].name}:</strong> ${sky(groom[0].code).toLowerCase()}, ${Math.round(groom[0].tmax)}°, ${Math.round(groom[0].wind)} mph wind. Groomer day.`; }
   else if (!open.length) { word = "THOU HAST\nNO KING"; cls = "no"; v = `<strong>The lifts have not yet turned.</strong> First chairs spin ${(() => { const n = all.filter(a => a.opens).sort((a, b) => a.opens < b.opens ? -1 : 1)[0]; return n ? "at " + n.name + " on " + new Date(n.opens + "T12:00:00").toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "soon"; })()}.`; }
@@ -445,7 +447,8 @@ function render(data, live) {
   // Colour rule: a resort name is blue (and wears the crown); NOBODY is red.
   const named = !word.startsWith("THOU HAST");
   if (named) $("crown").removeAttribute("hidden"); else $("crown").setAttribute("hidden", "");
-  $("word").textContent = word; $("word").className = "word " + (named ? "sky" : "no"); fitWord();
+  if (named && best && LINKS[best.name]) { $("word").innerHTML = `<a href="${LINKS[best.name]}" target="_blank" rel="noopener" title="${best.name} snow report">${word}</a>`; } else { $("word").textContent = word; }
+  $("word").className = "word " + (named ? "sky" : "no"); fitWord();
   $("verdict").innerHTML = v;
   // stat row
   const deepest = all.filter(a => a.isOpen).sort((a, b) => b.last24 - a.last24)[0];
@@ -457,7 +460,7 @@ function render(data, live) {
   $("s-storm").innerHTML = biggest && biggest.next5 >= 0.05 ? `${fmtIn(biggest.next5)}<small>in</small>` : `0<small>in</small>`;
   $("s-storm-note").textContent = biggest && biggest.next5 >= 0.05 ? biggest.name : "Nothing coming";
 
-  const stamp = new Date(data.updated).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" });
+  const stamp = new Date(data.updated).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   $("dot").className = "dot" + (live ? " live" : "");
   $("status").textContent = (live ? "Live from Open-Meteo · " : "Snapshot · ") + "updated " + stamp;
   reveal();
@@ -536,16 +539,14 @@ if (/^https:\/\//.test(SIGNUP_URL)) {
 }
 
 (async () => {
-  // Render once: wait briefly for live weather, otherwise fall back to the baked-in snapshot.
-  let done = false;
-  const fallback = setTimeout(() => { if (!done) { done = true; render(SNAPSHOT, false); } }, 3000);
+  // Render the baked-in snapshot right away so the page is never blank, then refresh with live weather.
+  if (SNAPSHOT && SNAPSHOT.resorts) render(SNAPSHOT, false);
   try {
     const live = await fetchLive(SNAPSHOT.resorts);
-    clearTimeout(fallback);
-    render(live, true); done = true;
+    render(live, true);
   } catch (e) {
-    clearTimeout(fallback);
-    if (!done) { done = true; render(SNAPSHOT, false); }
+    // Live weather failed; the snapshot render above (if any) stays on screen.
+    if (!lastData && SNAPSHOT && SNAPSHOT.resorts) render(SNAPSHOT, false);
   }
 })();
 </script>
