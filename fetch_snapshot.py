@@ -36,9 +36,9 @@ RESORTS = [
     # Midwest
     ("Boyne Mountain", "MI", 45.163, -84.93, 390, "boyne", "2026-12-04", "michigan/boyne-mountain-resort"),
     ("The Highlands", "MI", 45.47, -84.93, 400, "boynehighlands", "2026-12-11", "michigan/boyne-highlands"),
-    ("Snowriver", "MI", 46.496, -89.963, 500, "bigpowderhorn|blackjack", "2026-11-27", "michigan/snowriver-mountain-resort"),
-    ("Lutsen", "MN", 47.664, -90.718, 500, "lutsen", "2026-11-26", "minnesota/lutsen-mountains"),
-    ("Granite Peak", "WI", 44.93, -89.683, 450, "granitepeak", "2026-11-25", "wisconsin/granite-peak-ski-area"),
+    ("Snowriver", "MI", 46.496, -89.963, 500, "bigpowderhorn|blackjack", "2026-12-05", "michigan/snowriver-mountain-resort"),
+    ("Lutsen", "MN", 47.664, -90.718, 500, "lutsen", "2026-11-28", "minnesota/lutsen-mountains"),
+    ("Granite Peak", "WI", 44.93, -89.683, 450, "granitepeak", "2026-11-28", "wisconsin/granite-peak-ski-area"),
     # East
     ("Killington", "VT", 43.604, -72.82, 1290, "killington|pico", "2026-11-17", "vermont/killington-resort"),
     ("Stratton", "VT", 43.113, -72.908, 1180, "stratton", "2026-11-25", "vermont/stratton-mountain"),
